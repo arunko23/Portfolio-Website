@@ -1,0 +1,94 @@
+            <svg xmlns="http://www.w3.org/2000/svg" width="500" height="320" viewBox="0 0 500 320" fill="none" class="comic-panel p-2 bg-white" style="max-width: 100%; height: auto; border: 3px solid #000;">
+              <!-- Blueprint Grid Background -->
+              <g stroke="#e0e0e0" stroke-width="1" stroke-dasharray="2 2" transform="translate(0,0)">
+                <path d="M0,20 L500,20 M0,40 L500,40 M0,60 L500,60 M0,80 L500,80 M0,100 L500,100 M0,120 L500,120 M0,140 L500,140 M0,160 L500,160 M0,180 L500,180 M0,200 L500,200 M0,220 L500,220 M0,240 L500,240 M0,260 L500,260 M0,280 L500,280 M0,300 L500,300" />
+                <path d="M20,0 L20,320 M40,0 L40,320 M60,0 L60,320 M80,0 L80,320 M100,0 L100,320 M120,0 L120,320 M140,0 L140,320 M160,0 L160,320 M180,0 L180,320 M200,0 L200,320 M220,0 L220,320 M240,0 L240,320 M260,0 L260,320 M280,0 L280,320 M300,0 L300,320 M320,0 L320,320 M340,0 L340,320 M360,0 L360,320 M380,0 L380,320 M400,0 L400,320 M420,0 L420,320 M440,0 L440,320 M460,0 L460,320 M480,0 L480,320" />
+              </g>
+
+              <!-- Main Kinetic/Robotic Arm Graphic (Center Right) -->
+              <g transform="translate(300, 180)">
+                <!-- Base Mount -->
+                <path d="M-80,100 L 80,100 L 60,70 L -60,70 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+                <circle cx="0" cy="70" r="30" fill="#fff" stroke="#000" stroke-width="4"/>
+                <circle cx="0" cy="70" r="15" fill="none" stroke="#000" stroke-width="3" stroke-dasharray="2 4"/>
+                <circle cx="0" cy="70" r="6" fill="#000"/>
+                
+                <!-- Lower Arm -->
+                <path d="M-20,45 L-30,-50 L30,-50 L20,45 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+                <!-- Arm detailing panels -->
+                <path d="M-12,35 L-18,-40 L18,-40 L12,35 Z" fill="none" stroke="#000" stroke-width="2"/>
+                
+                <!-- Elbow Joint -->
+                <circle cx="0" cy="-65" r="25" fill="#fff" stroke="#000" stroke-width="4"/>
+                <circle cx="0" cy="-65" r="10" fill="none" stroke="#000" stroke-width="2"/>
+                <path d="M-25,-65 L25,-65 M0,-90 L0,-40" stroke="#000" stroke-width="2"/>
+                
+                <!-- Upper Arm (Angled Left) -->
+                <g transform="rotate(-35, 0, -65)">
+                  <path d="M-15,-90 L-20,-170 L20,-170 L15,-90 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+                  <line x1="0" y1="-95" x2="0" y2="-165" stroke="#000" stroke-width="2" stroke-dasharray="6 4"/>
+                  
+                  <!-- Wrist Joint -->
+                  <circle cx="0" cy="-185" r="18" fill="#fff" stroke="#000" stroke-width="4"/>
+                  
+                  <!-- End Effector (Gripper) -->
+                  <path d="M-15,-200 C-30,-215 -35,-230 -25,-245 C-15,-245 -10,-225 -5,-200" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+                  <path d="M15,-200 C30,-215 35,-230 25,-245 C15,-245 10,-225 5,-200" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
+                  <circle cx="0" cy="-203" r="6" fill="#000"/>
+                </g>
+              </g>
+
+              <!-- Secondary Component Graphic (Top Left) -->
+              <g transform="translate(100, 100)">
+                <!-- Large Concentric Gears/Rotors -->
+                <circle cx="0" cy="0" r="60" fill="none" stroke="#000" stroke-width="4" stroke-dasharray="10 5"/>
+                <circle cx="0" cy="0" r="45" fill="none" stroke="#000" stroke-width="2"/>
+                <circle cx="0" cy="0" r="25" fill="#fff" stroke="#000" stroke-width="4"/>
+                <circle cx="0" cy="0" r="8" fill="#000"/>
+                
+                <!-- Internal Support Spokes -->
+                <path d="M0,-25 L0,-45 M0,25 L0,45 M-25,0 L-45,0 M25,0 L45,0 M-18,-18 L-32,-32 M18,18 L32,32 M18,-18 L32,-32 M-18,18 L-32,32" stroke="#000" stroke-width="3"/>
+                
+                <!-- Floating geometric lines and dimensioning arrows -->
+                <g stroke="#000" stroke-width="1.5">
+                  <path d="M65,0 L120,0 L120,30" stroke-linejoin="round"/>
+                  <!-- Arrow tip -->
+                  <path d="M115,25 L120,30 L125,25" fill="none"/>
+                  <circle cx="65" cy="0" r="3" fill="#000"/>
+                  
+                  <path d="M0,65 L0,140 L-40,140" stroke-linejoin="round" stroke-dasharray="4 2"/>
+                  <path d="M-35,135 L-40,140 L-35,145" fill="none"/>
+                  <circle cx="0" cy="65" r="3" fill="#000"/>
+                  
+                  <!-- Abstract math/coordinate texts -->
+                  <text x="125" y="0" font-family="monospace" font-size="12" font-weight="bold" fill="#000">SYS_A1</text>
+                  <text x="-95" y="145" font-family="monospace" font-size="12" font-weight="bold" fill="#000">T=40Nm</text>
+                  <text x="35" y="-55" font-family="monospace" font-size="11" fill="#000">θ=120°</text>
+                </g>
+              </g>
+
+              <!-- Additional Data Callouts & Accents -->
+              <g transform="translate(180, 240)">
+                <!-- Small technical schematic -->
+                <rect x="0" y="0" width="80" height="40" fill="#fff" stroke="#000" stroke-width="2"/>
+                <path d="M10,20 L30,5 L50,30 L70,15" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="15" r="2" fill="#000"/>
+                <text x="10" y="-5" font-family="monospace" font-size="10" font-weight="bold" fill="#000">FREQUENCIES</text>
+              </g>
+              
+              <g transform="translate(420, 40)">
+                <text font-family="monospace" font-size="14" font-weight="bold" fill="#000">Z-AXIS</text>
+                <path d="M0,8 L0,50" stroke="#000" stroke-width="2"/>
+                <path d="M-5,45 L0,50 L5,45" fill="none" stroke="#000" stroke-width="2"/>
+                <!-- Halftone pattern dots -->
+                <circle cx="-50" cy="10" r="2.5" fill="#000"/>
+                <circle cx="-40" cy="20" r="3.5" fill="#000"/>
+                <circle cx="-30" cy="30" r="4" fill="#000"/>
+                <circle cx="-20" cy="40" r="2" fill="#000"/>
+              </g>
+
+              <g transform="translate(30, 270)">
+                <text font-family="monospace" font-size="16" letter-spacing="2" font-weight="900" fill="#000">MK. IV</text>
+                <path d="M0,8 L60,8" stroke="#000" stroke-width="4"/>
+              </g>
+            </svg>

@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+
+:root {
+    --bg-color: #ffffff;
+    --text-main: #000000;
+    --text-muted: #000000;
+    /* Made much darker, essentially black */
+    --border-color: #000000;
+    --panel-bg: #ffffff;
+}
+
+/* Force override Bootstrap's text-muted utility everywhere except the navbar */
+.text-muted:not(.nav-link) {
+    color: #000000 !important;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Architects Daughter', cursive;
+    letter-spacing: 0.03em;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.navbar-brand {
+    font-family: 'Architects Daughter', cursive;
+    font-weight: 800;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    /* Added more letter spacing to headers */
+}
+
+/* Navbar */
+.navbar {
+    background: var(--bg-color);
+    /* Removed bottom border */
+}
+
+.nav-link {
+    color: #555555 !important;
+    /* Kept navbar items gray */
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    /* Added spacing to nav items */
+    transition: color 0.2s ease;
+    position: relative;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--text-main) !important;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+}
+
+.navbar-brand:hover,
+.navbar-brand.active {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+}
+
+.navbar-brand img {
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: calc(100vh - 80px);
+    /* Account for navbar */
+    display: flex;
+    align-items: center;
+    position: relative;
+    /* Reduced top padding */
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    /* Slightly smaller to fit better */
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    /* Comic outline effect */
+    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+}
+
+.hero-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    color: var(--text-muted);
+    font-family: 'Architects Daughter', cursive;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: inline-block;
+    padding: 4px 12px;
+    border: 2px solid var(--border-color);
+    background: #fff;
+    box-shadow: 3px 3px 0px 0px var(--border-color);
+}
+
+/* Comic Panels */
+.glass-panel,
+.comic-panel {
+    background: var(--panel-bg);
+    border: 3px solid var(--border-color);
+    padding: 1.5rem;
+    /* Reduced padding */
+    /* Hard offset shadow for comic effect */
+    box-shadow: 6px 6px 0px 0px var(--border-color);
+    /* Slightly smaller shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 0;
+}
+
+.glass-panel:hover,
+.comic-panel:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 4px 4px 0px 0px var(--border-color);
+}
+
+/* Base structural adjustments for single page fit */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Buttons */
+.btn-premium {
+    background: #ffffff;
+    color: var(--text-main);
+    border: 3px solid var(--border-color);
+    padding: 0.75rem 2rem;
+    font-family: 'Architects Daughter', cursive;
+    font-weight: 800;
+    border-radius: 0;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    box-shadow: 5px 5px 0px 0px var(--border-color);
+}
+
+.btn-premium:hover {
+    background: var(--border-color);
+    color: #ffffff;
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0px 0px var(--border-color);
+}
+
+/* Carousel Overrides */
+.carousel-inner {
+    border: 3px solid var(--border-color);
+}
+
+.carousel-caption {
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 3px solid var(--border-color);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+    color: var(--text-main);
+}
+
+.carousel-caption h3 {
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.carousel-caption p {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.carousel-indicators [data-bs-target] {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid var(--border-color);
+    opacity: 1;
+}
+
+.carousel-indicators .active {
+    background-color: var(--border-color);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(1) grayscale(100);
+}
+
+.badge {
+    background: #fff;
+    color: var(--text-main);
+    border: 2px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    font-family: 'Architects Daughter', cursive;
+    text-transform: uppercase;
+    font-weight: 800;
+    box-shadow: 2px 2px 0px 0px var(--border-color);
+    border-radius: 0;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    border-top: 3px solid var(--border-color) !important;
+    background: #fff;
+    font-family: 'Architects Daughter', cursive;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.artistic-bg {
+    /* Removed for minimal look */
+    display: none;
+}

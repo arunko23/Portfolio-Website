@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - ArunK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="main.css" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg sticky-top py-3">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                        stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="11" width="8" height="6" rx="2"></rect>
+                        <rect x="14" y="11" width="8" height="6" rx="2"></rect>
+                        <path d="M10 13a2 2 0 0 0 4 0"></path>
+                        <path d="M2 11l2-4"></path>
+                        <path d="M22 11l-2-4"></path>
+                    </svg>
+                    <span class="fs-4">AK</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation"
+                    style="border: 2px solid #000; border-radius: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#000" class="bi bi-list"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-center" id="navbarContent">
+                    <ul class="navbar-nav gap-5 mb-2 mb-lg-0 align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="project.html">Projects</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4 flex-grow-1 d-flex flex-column justify-content-center">
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold hero-title" style="font-size: 2.5rem;">Featured Projects</h1>
+            <p class="lead text-muted mx-auto"
+                style="max-width: 600px; font-weight: 600; font-size: 1.1rem; margin-bottom: 0;">
+                Showcasing practical engineering solutions, rigorous analysis, and precision design across various
+                mechatronic domains.
+            </p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="comic-panel p-2">
+                    <div id="projectCarousel" class="carousel slide carousel-fade">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <a href="https://github.com/arunko23/Formula-Student" class="text-decoration-none">
+                                <img src="4.png" class="d-block w-100 object-fit-contain"
+                                    alt="Formula-Student"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(80%) contrast(90%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>---</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">Formula-Student
+                                    </h3>
+                                </div>
+                                </a>
+                            </div>
+
+                            <div class="carousel-item ">
+                                <a href="https://github.com/arunko23/Aircraft-in-XFLR5" class="text-decoration-none" target="_blank">
+                                <img src="1.png" class="d-block w-100 object-fit-contain"
+                                    alt="Aircraft-in-XFLR5"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(80%) contrast(90%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>CAD Engine Render</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">Aircraft-in-XFLR5
+                                    </h3>
+                                </div>
+                                </a>
+                            </div>
+
+                            <div class="carousel-item">
+                                <a href="https://github.com/arunko23/Lunar-Rover" class="text-decoration-none" target="_blank">
+                                <img src="2.png" class="d-block w-100 object-fit-contain"
+                                    alt="Lunar-Rover"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(80%) contrast(90%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>Robotic Arm Mechanism</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">
+                                        Lunar-Rover</h3>
+                                </div>
+                                </a>
+                            </div>
+
+                            <div class="carousel-item">
+                                <a href="https://github.com/arunko23/HVAC-project" class="text-decoration-none" target="_blank">
+                                <img src="3.jpg" class="d-block w-100 object-fit-contain"
+                                    alt="HVAC-project"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(80%) contrast(90%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>---</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">HVAC-project
+                                    </h3>
+                                </div>
+                                </a>
+                            </div>
+
+                            <div class="carousel-item">
+                                <a href="https://github.com/arunko23/Centrifugal-Pump" class="text-decoration-none" target="_blank">
+                                <img src="5.jpg" class="d-block w-100 object-fit-contain"
+                                    alt="Centrifugal-Pump"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(80%) contrast(90%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>---</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">Centrifugal-Pump
+                                    </h3>
+                                </div>
+                                </a>
+                            </div>
+
+                            <div class="carousel-item">
+                                <a href="https://github.com/arunko23/Turing-Machine" class="text-decoration-none" target="_blank">
+                                <img src="6.jpg" class="d-block w-100 object-fit-contain"
+                                    alt="Turing-Machine"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(100%) contrast(120%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>---</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">Turing-Machine
+                                    </h3>
+                                </div>
+                            </a>
+                            </div>
+
+                            <div class="carousel-item">
+                                <a href="https://github.com/arunko23/Autonomous-UAV" class="text-decoration-none" target="_blank">
+                                <img src="7.jpg" class="d-block w-100 object-fit-contain"
+                                    alt="Autonomous-UAV"
+                                    style="height: 50vh; min-height: 300px; max-height: 480px; background: #fff; filter: grayscale(80%) contrast(90%);"
+                                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\'><rect width=\'800\' height=\'400\' fill=\'%23fff\'/><text x=\'50%\' y=\'50%\' fill=\'%23000\' font-size=\'24\' text-anchor=\'middle\'>---</text></svg>'">
+                                <div class="carousel-caption px-3 py-2">
+                                    <h3 class="fw-bold fs-4" style="font-family: 'Outfit';">Autonomous-UAV
+                                    </h3>
+                                </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#projectCarousel"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-3 mt-auto border-top">
+        <div class="container text-center">
+            <p class="mb-0 fs-6">All rights reserved. © 2026 Arun Koirala</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

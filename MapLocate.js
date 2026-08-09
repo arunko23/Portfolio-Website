@@ -367,6 +367,9 @@
     pendingLatLng = null;
   }
   document.getElementById('cancelBtn').addEventListener('click', closeForm);
+  if (document.getElementById('modalCloseX')) {
+    document.getElementById('modalCloseX').addEventListener('click', closeForm);
+  }
 
   photoInput.addEventListener('change', function(){
     const file = photoInput.files[0];

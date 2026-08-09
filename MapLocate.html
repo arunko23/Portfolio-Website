@@ -11,7 +11,10 @@
 </head>
 <body>
 
-<header>
+<header style="position: relative;">
+  <a href="index.html" style="position: absolute; top: 2rem; right: 2rem; text-decoration: none; color: var(--navy); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 4px;">
+    &larr; Back to Home
+  </a>
   <p class="eyebrow">Sector hazard log</p>
   <h1>Log risks along your flight sector</h1>
   <p class="sub">Locate yourself or click the map to mark a point, then log obstacle, burnout, and animal risk with remarks. Toggle 2D/3D views and track North orientation in real-time.</p>
@@ -109,7 +112,8 @@
 </main>
 
 <div class="overlay" id="overlay">
-  <div class="modal">
+  <div class="modal" style="position: relative;">
+    <button type="button" id="modalCloseX" style="position: absolute; top: 15px; right: 15px; border: none; background: transparent; font-size: 24px; cursor: pointer; color: var(--ink-soft); line-height: 1;" title="Close">&times;</button>
     <h2>Log sector point</h2>
     <p class="coords-line" id="coordsLine">0.0000, 0.0000</p>
     <form id="pinForm">

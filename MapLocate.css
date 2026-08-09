@@ -248,6 +248,7 @@
   }
   .ht-btn:hover{ background:var(--red-bg); }
   .ht-btn.active{ background:var(--red); color:#fff; }
+  .ht-btn.active#kmzToggleBtn{ background:#8A5A1E; color:#fff; border-color:#8A5A1E; }
   .ht-bolt{ font-size:13px; }
 
   /* High-tension line entry panel */

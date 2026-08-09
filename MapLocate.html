@@ -24,9 +24,11 @@
   <div class="toolbar">
     <button class="locate-btn" id="locateBtn"><span class="gps-dot"></span>Locate me</button>
     <button class="ht-btn" id="htLineModeBtn"><span class="ht-bolt">⚡</span>Log high tension line</button>
+    <button class="ht-btn" id="kmzToggleBtn" style="color:#8A5A1E; border-color:#8A5A1E;"><span class="ht-bolt">🔌</span>Cable network</button>
     <span class="gps-status" id="gpsStatus"></span>
     <span class="count" id="pinCount">0 points logged</span>
     <span class="count" id="lineCount" style="color:var(--red);">0 lines logged</span>
+    <span class="count" id="kmzCount" style="color:#8A5A1E;"></span>
   </div>
 
   <!-- Dedicated Search Bar with Place Name Autocomplete & Separate Lat/Long Inputs -->
@@ -160,6 +162,7 @@
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<script src="CablesData.js"></script>
 <script src="MapLocate.js"></script>
 </body>
 </html>

@@ -85,14 +85,20 @@
     map.setStyle(satelliteStyle);
     layerSatBtn.classList.add('active');
     layerStreetBtn.classList.remove('active');
-    map.once('idle', reapplyHtLayers);
+    map.once('idle', () => {
+      reapplyHtLayers();
+      if (typeof reapplyKmzLayers === 'function') reapplyKmzLayers();
+    });
   });
 
   layerStreetBtn.addEventListener('click', () => {
     map.setStyle(streetStyle);
     layerStreetBtn.classList.add('active');
     layerSatBtn.classList.remove('active');
-    map.once('idle', reapplyHtLayers);
+    map.once('idle', () => {
+      reapplyHtLayers();
+      if (typeof reapplyKmzLayers === 'function') reapplyKmzLayers();
+    });
   });
 
 
@@ -770,7 +776,140 @@
 
   setInterval(loadLines, 20000);
 
+  // --- KMZ CABLE NETWORK OVERLAY ---
+  const kmzToggleBtn = document.getElementById('kmzToggleBtn');
+  let kmzVisible = true;
+
+  function makeTowerIconCanvas(){
+    const ratio = 3;
+    const size = 30;
+    const canvas = document.createElement('canvas');
+    canvas.width = size * ratio;
+    canvas.height = size * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    ctx.strokeStyle = '#7A4A16';
+    ctx.fillStyle = '#7A4A16';
+    ctx.lineWidth = 1.7;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(6, 27); ctx.lineTo(15, 5);
+    ctx.moveTo(24, 27); ctx.lineTo(15, 5);
+    ctx.moveTo(9, 21); ctx.lineTo(21, 21);
+    ctx.moveTo(10.5, 16); ctx.lineTo(19.5, 16);
+    ctx.moveTo(12, 11); ctx.lineTo(18, 11);
+    ctx.moveTo(7.5, 8); ctx.lineTo(22.5, 8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(7.5, 8, 1.5, 0, Math.PI * 2);
+    ctx.arc(22.5, 8, 1.5, 0, Math.PI * 2);
+    ctx.arc(15, 5, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    return canvas;
+  }
+
+  function ensureKmzLayers(){
+    if (!map.getSource('kmz-cables-source') && typeof KMZ_CABLES_DATA !== 'undefined'){
+      map.addSource('kmz-cables-source', { type: 'geojson', data: KMZ_CABLES_DATA });
+      const kmzCountEl = document.getElementById('kmzCount');
+      if (kmzCountEl) kmzCountEl.textContent = KMZ_CABLES_DATA.features.length.toLocaleString() + ' cable features loaded';
+    }
+    if (!map.getLayer('kmz-lines-layer')){
+      map.addLayer({
+        id: 'kmz-lines-layer',
+        type: 'line',
+        source: 'kmz-cables-source',
+        paint: { 'line-color': '#C9781D', 'line-width': 2 }
+      });
+      const showKmzPopup = function(e){
+        const f = e.features[0];
+        const name = (f.properties.name || '').trim();
+        const group = (f.properties.group || '').trim();
+        new maplibregl.Popup({ offset: 8, closeButton: false })
+          .setLngLat(e.lngLat)
+          .setHTML(`
+            <div class="pop-wrap">
+              <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">&times;</button>
+              <p class="pop-title" style="font-size:14px;">${escapeHtml(name || 'Cable feature')}</p>
+              ${group ? `<p class="pop-coords-inline">${escapeHtml(group)}</p>` : ''}
+            </div>
+          `)
+          .addTo(map);
+      };
+      map.on('click', 'kmz-lines-layer', showKmzPopup);
+      map.on('mouseenter', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = ''; });
+    }
+    if (!map.hasImage('ht-tower-icon')){
+      map.addImage('ht-tower-icon', makeTowerIconCanvas(), { pixelRatio: 3 });
+    }
+    if (!map.getLayer('kmz-points-layer')){
+      map.addLayer({
+        id: 'kmz-points-layer',
+        type: 'symbol',
+        source: 'kmz-cables-source',
+        layout: {
+          'icon-image': 'ht-tower-icon',
+          'icon-size': 0.6,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        }
+      });
+      map.on('click', 'kmz-points-layer', function(e){
+        const f = e.features[0];
+        const name = (f.properties.name || '').trim();
+        const group = (f.properties.group || '').trim();
+        const coords = f.geometry.coordinates;
+        new maplibregl.Popup({ offset: 8, closeButton: false })
+          .setLngLat(e.lngLat)
+          .setHTML(`
+            <div class="pop-wrap">
+              <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">&times;</button>
+              <p class="pop-title" style="font-size:14px;">${escapeHtml(name || 'Cable point')}</p>
+              ${group ? `<p class="pop-coords-inline">${escapeHtml(group)}</p>` : ''}
+              <p class="pop-coords-inline">${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}</p>
+            </div>
+          `)
+          .addTo(map);
+      });
+      map.on('mouseenter', 'kmz-points-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'kmz-points-layer', () => { map.getCanvas().style.cursor = ''; });
+    }
+    setKmzVisibility(kmzVisible);
+  }
+
+  function setKmzVisibility(visible){
+    const vis = visible ? 'visible' : 'none';
+    ['kmz-lines-layer', 'kmz-points-layer'].forEach(id => {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis);
+    });
+  }
+
+  function reapplyKmzLayers(){
+    ensureKmzLayers();
+  }
+
+  map.on('styledata', function(){
+    if (!map.isStyleLoaded()) return;
+    if (!map.getSource('kmz-cables-source') && typeof KMZ_CABLES_DATA !== 'undefined') {
+      reapplyKmzLayers();
+    }
+  });
+
+  if (kmzToggleBtn) {
+    kmzToggleBtn.addEventListener('click', function(){
+      kmzVisible = !kmzVisible;
+      kmzToggleBtn.classList.toggle('active', kmzVisible);
+      setKmzVisibility(kmzVisible);
+    });
+  }
+
   map.on('load', function(){
+    if (typeof KMZ_CABLES_DATA !== 'undefined') {
+      ensureKmzLayers();
+      if (kmzToggleBtn) kmzToggleBtn.classList.add('active');
+    }
     ensureHtMapLayers();
     loadPins();
     loadLines();

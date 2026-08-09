@@ -417,10 +417,14 @@
       }
 
       const response = await fetch('/functions/submit', { method: 'POST', body: fd });
-      const data = await response.json();
+      const rawText = await response.text();
+      console.log('Submit response status:', response.status, 'body:', rawText);
+
+      let data;
+      try { data = JSON.parse(rawText); } catch(_) { data = {}; }
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || ('HTTP ' + response.status));
+        throw new Error(data.error || `HTTP ${response.status}: ${rawText.slice(0, 200)}`);
       }
 
       // Reload from API so the new pin shows with its real DB id

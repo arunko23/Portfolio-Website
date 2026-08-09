@@ -209,28 +209,13 @@
   let htMarkerB = null;
   const savedLines = {}; // id -> { lat1, lng1, lat2, lng2, loggedAt }
 
-  const sharedModeAvailable = !!(window.storage && window.storage.set && window.storage.get && window.storage.list && window.storage.delete);
+  // --- RISK NAME → DB ID MAP (matches schema.sql seed: Low=1, Medium=2, High=3) ---
+  const RISK_ID = { 'Low': 1, 'Medium': 2, 'High': 3 };
 
-  async function storeSet(key, value){
-    if (sharedModeAvailable){
-      const result = await window.storage.set(key, value, true);
-      if (!result) throw new Error('Shared storage returned no result.');
-      return;
-    }
-    localStorage.setItem(key, value);
-  }
-  async function storeGet(key){
-    if (sharedModeAvailable){
-      const result = await window.storage.get(key, true);
-      return result ? result.value : null;
-    }
-    return localStorage.getItem(key);
-  }
-  async function storeListKeys(prefix){
-    if (sharedModeAvailable){
-      const result = await window.storage.list(prefix, true);
-      return (result && result.keys) || [];
-    }
+  // --- HT LINE STORAGE (localStorage only — no backend API for lines yet) ---
+  async function lineStoreSet(key, value){ localStorage.setItem(key, value); }
+  async function lineStoreGet(key){ return localStorage.getItem(key); }
+  async function lineStoreListKeys(prefix){
     const keys = [];
     for (let i = 0; i < localStorage.length; i++){
       const k = localStorage.key(i);
@@ -238,13 +223,7 @@
     }
     return keys;
   }
-  async function storeDelete(key){
-    if (sharedModeAvailable){
-      await window.storage.delete(key, true);
-      return;
-    }
-    localStorage.removeItem(key);
-  }
+  async function lineStoreDelete(key){ localStorage.removeItem(key); }
 
   const overlay = document.getElementById('overlay');
   const pinForm = document.getElementById('pinForm');
@@ -302,7 +281,11 @@
 
   window.deletePin = async function(id){
     try {
-      await storeDelete('pins:' + id);
+      const res = await fetch('/functions/delete-submission?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || ('HTTP ' + res.status));
+      }
     } catch (e) {
       console.error('Delete failed', e);
       alert('Could not remove this point: ' + e.message);
@@ -403,29 +386,48 @@
   pinForm.addEventListener('submit', async function(e){
     e.preventDefault();
     if (!pendingLatLng) return;
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-    const pin = {
-      lat: pendingLatLng.lat,
-      lng: pendingLatLng.lng,
-      sector: document.getElementById('sector').value.trim() || 'Unnamed sector',
-      pic: document.getElementById('pic').value.trim() || 'Unspecified',
-      obstacleRisk: document.getElementById('obstacleRisk').value,
-      burnoutRisk: document.getElementById('burnoutRisk').value,
-      animalRisk: document.getElementById('animalRisk').value,
-      remarks: document.getElementById('remarks').value.trim(),
-      photo: pendingPhoto,
-      loggedAt: Date.now()
-    };
+
+    const sector       = document.getElementById('sector').value.trim() || 'Unnamed sector';
+    const pic          = document.getElementById('pic').value.trim() || 'Unspecified';
+    const obstacleRisk = document.getElementById('obstacleRisk').value;
+    const burnoutRisk  = document.getElementById('burnoutRisk').value;
+    const animalRisk   = document.getElementById('animalRisk').value;
+    const remarks      = document.getElementById('remarks').value.trim();
 
     const saveBtn = pinForm.querySelector('.btn-primary');
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
 
     try {
-      await storeSet('pins:' + id, JSON.stringify(pin));
+      const fd = new FormData();
+      fd.append('sector',           sector);
+      fd.append('lat',              String(pendingLatLng.lat));
+      fd.append('lng',              String(pendingLatLng.lng));
+      fd.append('pic',              pic);
+      fd.append('obstacle_risk_id', String(RISK_ID[obstacleRisk] || 1));
+      fd.append('burnout_risk_id',  String(RISK_ID[burnoutRisk]  || 1));
+      fd.append('animal_risk_id',   String(RISK_ID[animalRisk]   || 1));
+      fd.append('remarks',          remarks);
+
+      // Attach photo if one was selected (convert base64 data URL → File blob)
+      if (pendingPhoto) {
+        const res = await fetch(pendingPhoto);
+        const blob = await res.blob();
+        fd.append('photo', blob, 'photo.jpg');
+      }
+
+      const response = await fetch('/functions/submit', { method: 'POST', body: fd });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || ('HTTP ' + response.status));
+      }
+
+      // Reload from API so the new pin shows with its real DB id
+      await loadPins();
     } catch (err) {
       console.error('Save failed', err);
-      alert('Could not save this point: ' + err.message + '\n\nIf this keeps happening, try attaching a smaller photo or removing it.');
+      alert('Could not save this point: ' + err.message);
       saveBtn.disabled = false;
       saveBtn.textContent = 'Save point';
       return;
@@ -433,28 +435,39 @@
 
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save point';
-    addSavedMarker(id, pin);
     updateCount();
     closeForm();
   });
 
   async function loadPins(){
     try {
-      const keys = await storeListKeys('pins:');
-      for (const key of keys) {
-        if (savedMarkers[key.replace('pins:', '')]) continue;
-        try {
-          const val = await storeGet(key);
-          if (val) {
-            const pin = JSON.parse(val);
-            const id = key.replace('pins:', '');
-            addSavedMarker(id, pin);
-          }
-        } catch (innerErr) {
-          console.error('Could not load point', key, innerErr);
-        }
+      const res = await fetch('/functions/submissions');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const submissions = await res.json();
+
+      const liveIds = new Set();
+
+      for (const s of submissions) {
+        const id = String(s.id);
+        liveIds.add(id);
+        if (savedMarkers[id]) continue; // already on map
+
+        const pin = {
+          lat:          s.lat,
+          lng:          s.lng,
+          sector:       s.location_name,
+          pic:          s.pic,
+          obstacleRisk: s.obstacle_risk,
+          burnoutRisk:  s.burnout_risk,
+          animalRisk:   s.animal_risk,
+          remarks:      s.remarks || '',
+          photo:        s.image_url || null,
+          loggedAt:     new Date(s.created_at).getTime()
+        };
+        addSavedMarker(id, pin);
       }
-      const liveIds = new Set(keys.map(k => k.replace('pins:', '')));
+
+      // Remove markers that are no longer in the DB
       for (const id of Object.keys(savedMarkers)) {
         if (!liveIds.has(id)) {
           savedMarkers[id].remove();
@@ -717,7 +730,7 @@
     htSaveBtn.disabled = true;
     htSaveBtn.textContent = 'Saving…';
     try {
-      await storeSet('lines:' + id, JSON.stringify(line));
+      await lineStoreSet('lines:' + id, JSON.stringify(line));
     } catch (err) {
       console.error('Save failed', err);
       alert('Could not save this line: ' + err.message);
@@ -737,7 +750,7 @@
 
   window.deleteHtLine = async function(id){
     try {
-      await storeDelete('lines:' + id);
+      await lineStoreDelete('lines:' + id);
     } catch (e) {
       console.error('Delete failed', e);
       alert('Could not remove this line: ' + e.message);
@@ -752,12 +765,12 @@
 
   async function loadLines(){
     try {
-      const keys = await storeListKeys('lines:');
+      const keys = await lineStoreListKeys('lines:');
       for (const key of keys) {
         const id = key.replace('lines:', '');
         if (savedLines[id]) continue;
         try {
-          const val = await storeGet(key);
+          const val = await lineStoreGet(key);
           if (val) savedLines[id] = JSON.parse(val);
         } catch (innerErr) {
           console.error('Could not load line', key, innerErr);

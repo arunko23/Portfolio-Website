@@ -212,18 +212,8 @@
   // --- RISK NAME → DB ID MAP (matches schema.sql seed: Low=1, Medium=2, High=3) ---
   const RISK_ID = { 'Low': 1, 'Medium': 2, 'High': 3 };
 
-  // --- HT LINE STORAGE (localStorage only — no backend API for lines yet) ---
-  async function lineStoreSet(key, value){ localStorage.setItem(key, value); }
-  async function lineStoreGet(key){ return localStorage.getItem(key); }
-  async function lineStoreListKeys(prefix){
-    const keys = [];
-    for (let i = 0; i < localStorage.length; i++){
-      const k = localStorage.key(i);
-      if (k && k.startsWith(prefix)) keys.push(k);
-    }
-    return keys;
-  }
-  async function lineStoreDelete(key){ localStorage.removeItem(key); }
+  // --- HT LINE STORAGE (Now API-backed) ---
+  // We no longer use lineStore* methods; directly using fetch in handlers.
 
   const overlay = document.getElementById('overlay');
   const pinForm = document.getElementById('pinForm');
@@ -724,17 +714,30 @@
 
   htSaveBtn.addEventListener('click', async function(){
     if (!htPointA || !htPointB) return;
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    const line = {
-      name: htLineName.value.trim(),
-      lat1: htPointA.lat, lng1: htPointA.lng,
-      lat2: htPointB.lat, lng2: htPointB.lng,
-      loggedAt: Date.now()
-    };
+
+    const name = htLineName.value.trim();
+    const lat1 = htPointA.lat, lng1 = htPointA.lng;
+    const lat2 = htPointB.lat, lng2 = htPointB.lng;
+
     htSaveBtn.disabled = true;
     htSaveBtn.textContent = 'Saving…';
+
     try {
-      await lineStoreSet('lines:' + id, JSON.stringify(line));
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('lat1', String(lat1));
+      fd.append('lng1', String(lng1));
+      fd.append('lat2', String(lat2));
+      fd.append('lng2', String(lng2));
+
+      const res = await fetch('/submit-line', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || ('HTTP ' + res.status));
+      }
+      
+      // Reload lines from DB to get the real ID
+      await loadLines();
     } catch (err) {
       console.error('Save failed', err);
       alert('Could not save this line: ' + err.message);
@@ -742,11 +745,9 @@
       htSaveBtn.textContent = 'Save high tension line';
       return;
     }
+
     htSaveBtn.disabled = false;
     htSaveBtn.textContent = 'Save high tension line';
-    savedLines[id] = line;
-    redrawSavedLinesOnMap();
-    updateLinesCount();
     clearHtDrawing();
   });
 
@@ -754,7 +755,8 @@
 
   window.deleteHtLine = async function(id){
     try {
-      await lineStoreDelete('lines:' + id);
+      const res = await fetch('/delete-line?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
     } catch (e) {
       console.error('Delete failed', e);
       alert('Could not remove this line: ' + e.message);
@@ -769,18 +771,22 @@
 
   async function loadLines(){
     try {
-      const keys = await lineStoreListKeys('lines:');
-      for (const key of keys) {
-        const id = key.replace('lines:', '');
-        if (savedLines[id]) continue;
-        try {
-          const val = await lineStoreGet(key);
-          if (val) savedLines[id] = JSON.parse(val);
-        } catch (innerErr) {
-          console.error('Could not load line', key, innerErr);
-        }
+      const res = await fetch('/lines');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const lines = await res.json();
+      
+      const liveIds = new Set();
+      for (const row of lines) {
+        const id = String(row.id);
+        liveIds.add(id);
+        savedLines[id] = {
+          name: row.name,
+          lat1: row.lat1, lng1: row.lng1,
+          lat2: row.lat2, lng2: row.lng2,
+          loggedAt: new Date(row.created_at).getTime()
+        };
       }
-      const liveIds = new Set(keys.map(k => k.replace('lines:', '')));
+      
       for (const id of Object.keys(savedLines)) {
         if (!liveIds.has(id)) delete savedLines[id];
       }

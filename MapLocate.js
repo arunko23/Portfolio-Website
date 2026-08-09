@@ -250,7 +250,7 @@
         ${pin.remarks ? `<p class="pop-notes">${escapeHtml(pin.remarks)}</p>` : ''}
         ${pin.photo ? `<img class="pop-photo" src="${pin.photo}" />` : ''}
         <p class="pop-coords">${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}</p>
-        <button class="pop-btn pop-btn-del" onclick="deletePin('${id}')">Remove</button>
+        <!-- <button class="pop-btn pop-btn-del" onclick="deletePin('${id}')">Remove</button> -->
       </div>
     `;
   }
@@ -572,7 +572,7 @@
               <p class="pop-title" style="font-size:14.5px;">${escapeHtml(line.name && line.name.trim() ? line.name : 'High tension line')}</p>
               <p class="pop-coords-inline">A: ${line.lat1.toFixed(5)}, ${line.lng1.toFixed(5)}</p>
               <p class="pop-coords-inline" style="margin-bottom:8px;">B: ${line.lat2.toFixed(5)}, ${line.lng2.toFixed(5)}</p>
-              <button class="pop-btn pop-btn-del" onclick="deleteHtLine('${id}')">Remove</button>
+              <!-- <button class="pop-btn pop-btn-del" onclick="deleteHtLine('${id}')">Remove</button> -->
             </div>
           `)
           .addTo(map);

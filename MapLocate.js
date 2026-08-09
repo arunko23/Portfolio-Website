@@ -281,7 +281,7 @@
 
   window.deletePin = async function(id){
     try {
-      const res = await fetch('/functions/delete-submission?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      const res = await fetch('/delete-submission?id=' + encodeURIComponent(id), { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || ('HTTP ' + res.status));
@@ -416,7 +416,7 @@
         fd.append('photo', blob, 'photo.jpg');
       }
 
-      const response = await fetch('/functions/submit', { method: 'POST', body: fd });
+      const response = await fetch('/submit', { method: 'POST', body: fd });
       const rawText = await response.text();
       console.log('Submit response status:', response.status, 'body:', rawText);
 
@@ -445,7 +445,7 @@
 
   async function loadPins(){
     try {
-      const res = await fetch('/functions/submissions');
+      const res = await fetch('/submissions');
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const submissions = await res.json();
 

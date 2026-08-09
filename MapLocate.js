@@ -855,7 +855,10 @@
       map.on('mouseleave', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = ''; });
     }
     if (!map.hasImage('ht-tower-icon')){
-      map.addImage('ht-tower-icon', makeTowerIconCanvas(), { pixelRatio: 3 });
+      const _towerCanvas = makeTowerIconCanvas();
+      const _towerCtx = _towerCanvas.getContext('2d');
+      const _towerData = _towerCtx.getImageData(0, 0, _towerCanvas.width, _towerCanvas.height);
+      map.addImage('ht-tower-icon', { width: _towerCanvas.width, height: _towerCanvas.height, data: _towerData.data }, { pixelRatio: 3 });
     }
     if (!map.getLayer('kmz-points-layer')){
       map.addLayer({

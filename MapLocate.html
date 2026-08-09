@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sector Hazard Log</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="MapLocate.css" />
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Sector hazard log</p>
+  <h1>Log risks along your flight sector</h1>
+  <p class="sub">Locate yourself or click the map to mark a point, then log obstacle, burnout, and animal risk with remarks. Toggle 2D/3D views and track North orientation in real-time.</p>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="locate-btn" id="locateBtn"><span class="gps-dot"></span>Locate me</button>
+    <button class="ht-btn" id="htLineModeBtn"><span class="ht-bolt">⚡</span>Log high tension line</button>
+    <span class="gps-status" id="gpsStatus"></span>
+    <span class="count" id="pinCount">0 points logged</span>
+    <span class="count" id="lineCount" style="color:var(--red);">0 lines logged</span>
+  </div>
+
+  <!-- Dedicated Search Bar with Place Name Autocomplete & Separate Lat/Long Inputs -->
+  <div class="search-panel">
+    <div class="search-field">
+      <label for="placeSearchInput">Search Place Name</label>
+      <input type="text" id="placeSearchInput" placeholder="Type location (e.g. Pokhara, Ridge)..." autocomplete="off" />
+      <div id="recommendationsBox" class="recommendations-box"></div>
+    </div>
+    <div class="coords-field-group">
+      <div class="coords-field">
+        <label for="searchLat">Latitude</label>
+        <input type="number" step="any" id="searchLat" placeholder="e.g. 27.6710" />
+      </div>
+      <div class="coords-field">
+        <label for="searchLng">Longitude</label>
+        <input type="number" step="any" id="searchLng" placeholder="e.g. 85.4298" />
+      </div>
+      <button type="button" class="search-btn" id="searchCoordsBtn">Go to Coords</button>
+    </div>
+  </div>
+
+  <!-- High Tension Line logging panel -->
+  <div class="search-panel ht-panel" id="htLinePanel">
+    <p class="ht-hint-line" id="htHint">Click two points on the map, or type in both points' coordinates below, then draw the line.</p>
+    <div class="coords-field-group">
+      <div class="coords-field">
+        <label for="htLatA">Point A — Latitude</label>
+        <input type="number" step="any" id="htLatA" placeholder="e.g. 27.6710" />
+      </div>
+      <div class="coords-field">
+        <label for="htLngA">Point A — Longitude</label>
+        <input type="number" step="any" id="htLngA" placeholder="e.g. 85.4298" />
+      </div>
+    </div>
+    <div class="coords-field-group">
+      <div class="coords-field">
+        <label for="htLatB">Point B — Latitude</label>
+        <input type="number" step="any" id="htLatB" placeholder="e.g. 27.6800" />
+      </div>
+      <div class="coords-field">
+        <label for="htLngB">Point B — Longitude</label>
+        <input type="number" step="any" id="htLngB" placeholder="e.g. 85.4400" />
+      </div>
+    </div>
+    <div class="field" style="width:100%; margin-bottom:0;">
+      <label for="htLineName">Line name</label>
+      <input type="text" id="htLineName" placeholder="e.g. Ridge feeder line" />
+    </div>
+    <button type="button" class="search-btn" id="htDrawBtn">Draw line</button>
+    <button type="button" class="search-btn ht-save" id="htSaveBtn" style="display:none;">Save high tension line</button>
+    <button type="button" class="btn" id="htCancelBtn">Cancel</button>
+  </div>
+
+  <div class="map-frame">
+    <!-- Map Controls (2D / 3D, Satellite / Street, Compass North reset) -->
+    <div class="map-controls-bar">
+      <div class="control-group">
+        <button type="button" class="ctrl-btn active" id="mode2dBtn">2D</button>
+        <button type="button" class="ctrl-btn" id="mode3dBtn">3D</button>
+      </div>
+      <div class="control-group">
+        <button type="button" class="ctrl-btn active" id="layerSatBtn">Satellite</button>
+        <button type="button" class="ctrl-btn" id="layerStreetBtn">Street</button>
+      </div>
+      <button type="button" class="north-indicator-btn" id="northResetBtn" title="Click to align North up">
+        <svg class="compass-arrow" id="compassArrow" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L17 12H12V2Z" fill="#B23A2E"/>
+          <path d="M12 2L7 12H12V2Z" fill="#D98324"/>
+          <path d="M12 22L17 12H12V22Z" fill="#1B3A4B"/>
+          <path d="M12 22L7 12H12V22Z" fill="#5B6068"/>
+        </svg>
+        <span id="northLabel">N</span>
+      </button>
+    </div>
+
+    <div id="map"></div>
+    <div class="hint-row">
+      <span class="hint">Right-click & drag (or Ctrl+drag) to rotate/tilt 3D view. Click map to log a point, or use "Log high tension line" above to log a line between two points.</span>
+    </div>
+  </div>
+  <p class="empty-note" id="emptyNote" style="display:none;">No points logged yet.</p>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>Log sector point</h2>
+    <p class="coords-line" id="coordsLine">0.0000, 0.0000</p>
+    <form id="pinForm">
+      <div class="field">
+        <label for="sector">Sector name</label>
+        <input type="text" id="sector" placeholder="e.g. Sector 4 - Ridge approach" required />
+      </div>
+      <div class="field">
+        <label for="pic">PIC name</label>
+        <input type="text" id="pic" placeholder="Pilot in command" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="obstacleRisk">Obstacle risk</label>
+          <select id="obstacleRisk"><option>Low</option><option>Medium</option><option>High</option></select>
+        </div>
+        <div class="field">
+          <label for="burnoutRisk">Burnout risk</label>
+          <select id="burnoutRisk"><option>Low</option><option>Medium</option><option>High</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="animalRisk">Animal risk</label>
+        <select id="animalRisk"><option>Low</option><option>Medium</option><option>High</option></select>
+      </div>
+      <div class="field">
+        <label for="remarks">Special remarks</label>
+        <textarea id="remarks" placeholder="Anything else worth flagging"></textarea>
+      </div>
+      <div class="field">
+        <label>Photo attachment</label>
+        <div class="file-drop">
+          Tap to attach a photo
+          <input type="file" id="photo" accept="image/*" capture="environment" />
+        </div>
+        <img class="photo-preview" id="photoPreview" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save point</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<script src="MapLocate.js"></script>
+</body>
+</html>

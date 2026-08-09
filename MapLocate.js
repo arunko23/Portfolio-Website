@@ -46,7 +46,35 @@
   });
 
   // Add standard zoom and compass controls
-  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true, showZoom: true }), 'top-left');
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true, showZoom: true }), 'bottom-left');
+
+  // --- FLOATING CONTROL PANEL (responsive show/hide) ---
+  const panelToggleBtn = document.getElementById('panelToggleBtn');
+  const controlPanel = document.getElementById('controlPanel');
+  const panelBackdrop = document.getElementById('panelBackdrop');
+  const panelDragHandle = document.getElementById('panelDragHandle');
+  const MOBILE_BREAKPOINT = 720;
+
+  function setPanelOpen(open){
+    controlPanel.classList.toggle('collapsed', !open);
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+    panelBackdrop.classList.toggle('visible', open && isMobile);
+  }
+  function isPanelOpen(){
+    return !controlPanel.classList.contains('collapsed');
+  }
+  panelToggleBtn.addEventListener('click', () => setPanelOpen(!isPanelOpen()));
+  panelBackdrop.addEventListener('click', () => setPanelOpen(false));
+  panelDragHandle.addEventListener('click', () => setPanelOpen(false));
+
+  // Panel starts open on desktop/tablet, collapsed on small screens so the map is visible first.
+  setPanelOpen(window.innerWidth > MOBILE_BREAKPOINT);
+
+  // Keep MapLibre's canvas correctly sized as the panel opens/closes and the window resizes.
+  window.addEventListener('resize', () => map.resize());
+  controlPanel.addEventListener('transitionend', (e) => {
+    if (e.propertyName === 'transform') map.resize();
+  });
 
   // --- 2D / 3D & COMPASS ORIENTATION LOGIC ---
   const mode2dBtn = document.getElementById('mode2dBtn');

@@ -1,4 +1,4 @@
-:root{
+  :root{
     --cream:#F5F3ED;
     --paper:#FFFFFF;
     --ink:#1C2128;
@@ -13,14 +13,29 @@
     --red:#B23A2E; --red-bg:#FBE7E4;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{ background:var(--cream); color:var(--ink); font-family:'Inter',sans-serif; min-height:100vh; }
-  header{ padding:2rem 2rem 1.25rem; max-width:1100px; margin:0 auto; }
-  .eyebrow{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); font-weight:700; margin:0 0 .4rem; }
-  h1{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(26px,3.6vw,36px); margin:0 0 .35rem; letter-spacing:-.01em; }
-  .sub{ color:var(--ink-soft); font-size:14.5px; max-width:600px; line-height:1.5; margin:0; }
-  main{ max-width:1100px; margin:0 auto; padding:0 2rem 3rem; }
-  .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:12px; }
+  html,body{margin:0;padding:0;height:100%;overscroll-behavior:none;}
+  body{ background:var(--cream); color:var(--ink); font-family:'Inter',sans-serif; height:100%; overflow:hidden; display:flex; flex-direction:column; }
+
+  /* Slim top bar */
+  header{
+    flex:0 0 auto; position:relative; z-index:50;
+    display:flex; align-items:center; gap:12px;
+    padding:.6rem .85rem; background:var(--paper); border-bottom:1px solid var(--line);
+  }
+  .panel-toggle-btn{
+    flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center;
+    width:38px; height:38px; border-radius:8px; border:1px solid var(--line-strong);
+    background:#fff; color:var(--navy); font-size:17px; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .panel-toggle-btn:hover{ background:var(--cream); }
+  .header-text{ min-width:0; flex:1 1 auto; }
+  .eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); font-weight:700; margin:0 0 .1rem; }
+  h1{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(15px,2vw,20px); margin:0; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sub{ color:var(--ink-soft); font-size:13px; line-height:1.5; margin:0 0 4px; }
+
+  /* Map fills all remaining space; control panel floats on top of it */
+  main{ position:relative; flex:1 1 auto; min-height:0; width:100%; margin:0; padding:0; }
+  .toolbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:0; }
   .locate-btn{
     display:inline-flex; align-items:center; gap:8px;
     background:var(--navy); color:#fff; border:none; border-radius:8px;
@@ -114,8 +129,8 @@
     font-weight: 500;
   }
 
-  .map-frame{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:10px; position:relative; }
-  #map{ height:540px; width:100%; border-radius:8px; border:1px solid var(--line); }
+  .map-frame{ background:var(--paper); border:none; border-radius:0; padding:0; position:absolute; inset:0; }
+  #map{ position:absolute; inset:0; height:100%; width:100%; border-radius:0; border:none; }
 
   /* Map Controls Overlay (2D/3D & Layer Switcher) */
   .map-controls-bar {
@@ -172,8 +187,71 @@
     transition: transform 0.2s ease-out;
   }
 
-  .hint-row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:10px; padding:0 4px; flex-wrap:wrap; }
-  .hint{ font-size:13px; color:var(--ink-soft); }
+  .hint-row{
+    position:absolute; left:16px; right:16px; bottom:14px; z-index:20;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+    background:rgba(255,255,255,0.92); backdrop-filter:blur(4px);
+    border:1px solid var(--line); border-radius:10px; padding:8px 12px; margin:0;
+  }
+  .hint{ font-size:12.5px; color:var(--ink-soft); }
+
+  /* Floating control panel (toolbar + search + high-tension logging) */
+  .control-panel{
+    position:absolute; top:16px; left:16px; z-index:40;
+    width:380px; max-width:calc(100vw - 32px);
+    max-height:calc(100% - 32px);
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.18);
+    padding:14px;
+    display:flex; flex-direction:column; gap:12px;
+    transition:transform .25s ease, opacity .2s ease;
+  }
+  .control-panel.collapsed{
+    transform:translateX(calc(-100% - 32px));
+    opacity:0;
+    pointer-events:none;
+  }
+  .control-panel .search-panel,
+  .control-panel .ht-panel{ margin-bottom:0; }
+  .control-panel .empty-note{ margin-top:0; }
+
+  .panel-backdrop{
+    position:absolute; inset:0; z-index:35;
+    background:rgba(28,33,40,0.35);
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .panel-backdrop.visible{ opacity:1; pointer-events:auto; }
+  .panel-drag-handle{ display:none; }
+
+  @media (max-width:720px){
+    header{ padding:.5rem .65rem; gap:8px; }
+    .panel-toggle-btn{ width:34px; height:34px; font-size:15px; }
+    h1{ font-size:14px; }
+    .eyebrow{ font-size:10px; }
+    .control-panel{
+      top:auto; left:0; right:0; bottom:0; width:100%; max-width:100%;
+      max-height:72vh; border-radius:16px 16px 0 0;
+      box-shadow:0 -8px 24px rgba(0,0,0,0.22);
+      padding-top:6px;
+    }
+    .control-panel.collapsed{ transform:translateY(100%); }
+    .panel-drag-handle{
+      display:block; width:36px; height:4px; border-radius:2px;
+      background:var(--line-strong); margin:0 auto 4px;
+      flex:0 0 auto;
+    }
+    .map-controls-bar{ top:12px; right:12px; gap:6px; }
+    .ctrl-btn{ padding:5px 9px; font-size:11px; }
+    .north-indicator-btn{ padding:5px 8px; font-size:11px; }
+    .search-field, .coords-field-group{ min-width:0; }
+  }
+
+  @media (max-width:420px){
+    .coords-field-group{ flex-direction:column; align-items:stretch; }
+    .search-btn{ width:100%; }
+  }
 
   /* MapLibre Popup Styling */
   .maplibregl-popup-content{ border-radius:8px; font-family:'Inter',sans-serif; padding:12px 14px; width:240px !important; box-shadow:0 4px 14px rgba(0,0,0,0.18); }
@@ -253,7 +331,12 @@
 
   /* High-tension line entry panel */
   .ht-panel{ display:none; }
-  .ht-panel.open{ display:flex; }
+  .ht-panel.open{
+    display:flex;
+    border-color:var(--red);
+    border-width:2px;
+    box-shadow:0 2px 10px rgba(178,58,46,0.15);
+  }
   .ht-panel .search-btn.ht-save{ background:var(--red); }
   .ht-panel .search-btn.ht-save:hover{ background:#8E2E24; }
   .ht-hint-line{ width:100%; font-size:12.5px; color:var(--ink-soft); margin:0 0 4px; }
@@ -281,3 +364,4 @@
   button.btn-primary{ background:var(--navy); border-color:var(--navy); color:#fff; }
   button.btn-primary:hover{ background:var(--navy-dark); }
   .empty-note{ font-size:12px; color:#8B8878; text-align:center; margin-top:10px; }
+</style>

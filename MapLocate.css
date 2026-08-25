@@ -33,12 +33,18 @@
   h1{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(15px,2vw,20px); margin:0; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sub{ color:var(--ink-soft); font-size:13px; line-height:1.5; margin:0 0 4px; }
   
+  .header-actions {
+    position: absolute; right: 15px;
+    display: flex; align-items: center; gap: 8px;
+  }
   .back-home-btn {
-    position: absolute; right: 15px; text-decoration: none; color: var(--navy);
+    text-decoration: none; color: var(--navy);
     font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;
     border: 1px solid var(--line-strong); padding: 6px 12px; border-radius: 8px;
     background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    white-space: nowrap;
   }
+  .back-home-btn:hover { background: var(--cream); }
 
   /* Map fills all remaining space; control panel floats on top of it */
   main{ position:relative; flex:1 1 auto; min-height:0; width:100%; margin:0; padding:0; }
@@ -237,7 +243,8 @@
     .panel-toggle-btn{ width:34px; height:34px; font-size:15px; }
     h1{ font-size:14px; }
     .eyebrow{ font-size:10px; }
-    .back-home-btn{ padding: 5px 8px; font-size: 11px; right: 8px; }
+    .header-actions { right: 8px; gap: 5px; }
+    .back-home-btn{ padding: 5px 8px; font-size: 11px; border-radius: 6px; }
     .control-panel{
       top:auto; left:0; right:0; bottom:0; width:100%; max-width:100%;
       max-height:72vh; border-radius:16px 16px 0 0;

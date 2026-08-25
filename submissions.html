@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Submissions Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="submissions.css" />
+</head>
+<body>
+
+<header>
+  <div class="header-text">
+    <p class="eyebrow">Flight Risk Database</p>
+    <h1>All Logged Submissions</h1>
+  </div>
+  <a href="MapLocate.html" class="header-btn">← Back to Map</a>
+  <a href="index.html" class="header-btn">⌂ Home</a>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Filter by location name…" />
+    <span class="result-count" id="resultCount">Loading…</span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="submissionsTable">
+      <thead>
+        <tr>
+          <th class="col-map">Map</th>
+          <th>Location</th>
+          <th>PIC</th>
+          <th>Obstacle</th>
+          <th>Burnout</th>
+          <th>Animal</th>
+          <th>Security</th>
+          <th>Size</th>
+          <th>Remarks</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="loading-row"><td colspan="10">Loading submissions…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="empty-note" id="emptyNote" style="display:none;">No submissions match your filter.</p>
+</main>
+
+<script>
+  const searchInput  = document.getElementById('searchInput');
+  const tableBody    = document.getElementById('tableBody');
+  const resultCount  = document.getElementById('resultCount');
+  const emptyNote    = document.getElementById('emptyNote');
+
+  const RISK_COLOR = { Low: 'green', Medium: 'yellow', High: 'red' };
+
+  function chip(value) {
+    const cls = RISK_COLOR[value] || 'green';
+    return `<span class="risk-chip risk-${cls}">${escapeHtml(value || '—')}</span>`;
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function formatDate(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  let allSubmissions = [];
+
+  function renderTable(data) {
+    tableBody.innerHTML = '';
+    emptyNote.style.display = data.length === 0 ? 'block' : 'none';
+    resultCount.textContent = data.length + (data.length === 1 ? ' result' : ' results');
+
+    if (data.length === 0) return;
+
+    data.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="col-map">
+          <a class="map-btn" href="MapLocate.html?lat=${s.lat}&lng=${s.lng}&zoom=14" title="View on map">📍</a>
+        </td>
+        <td class="col-location"><strong>${escapeHtml(s.location_name)}</strong><br><span class="coords">${parseFloat(s.lat).toFixed(4)}, ${parseFloat(s.lng).toFixed(4)}</span></td>
+        <td>${escapeHtml(s.pic)}</td>
+        <td>${chip(s.obstacle_risk)}</td>
+        <td>${chip(s.burnout_risk)}</td>
+        <td>${chip(s.animal_risk)}</td>
+        <td>${chip(s.security_risk)}</td>
+        <td>${chip(s.size_risk)}</td>
+        <td class="col-remarks">${escapeHtml(s.remarks || '—')}</td>
+        <td class="col-date">${formatDate(s.created_at)}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  function filterTable() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = q
+      ? allSubmissions.filter(s => (s.location_name || '').toLowerCase().includes(q))
+      : allSubmissions;
+    renderTable(filtered);
+  }
+
+  searchInput.addEventListener('input', filterTable);
+
+  // Load all submissions from API
+  fetch('/submissions')
+    .then(res => {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(data => {
+      allSubmissions = data;
+      renderTable(data);
+    })
+    .catch(err => {
+      tableBody.innerHTML = `<tr><td colspan="10" style="color:#B23A2E;text-align:center;">Failed to load: ${err.message}</td></tr>`;
+      resultCount.textContent = 'Error';
+    });
+</script>
+
+</body>
+</html>

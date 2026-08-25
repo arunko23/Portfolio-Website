@@ -972,4 +972,13 @@
     ensureHtMapLayers();
     loadPins();
     loadLines();
+
+    // Deep-link: if URL has ?lat=&lng=&zoom= (from submissions list), fly to that location
+    const urlParams = new URLSearchParams(window.location.search);
+    const deepLat  = parseFloat(urlParams.get('lat'));
+    const deepLng  = parseFloat(urlParams.get('lng'));
+    const deepZoom = parseFloat(urlParams.get('zoom')) || 14;
+    if (!isNaN(deepLat) && !isNaN(deepLng)) {
+      map.flyTo({ center: [deepLng, deepLat], zoom: deepZoom, duration: 1200 });
+    }
   });

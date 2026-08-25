@@ -1,0 +1,112 @@
+:root {
+  --cream: #F5F3ED;
+  --paper: #FFFFFF;
+  --ink: #1C2128;
+  --ink-soft: #5B6068;
+  --navy: #1B3A4B;
+  --navy-dark: #12262F;
+  --amber: #D98324;
+  --line: #DCD9CF;
+  --line-strong: #C3BFAF;
+  --green: #2E7D4F; --green-bg: #E5F3EA;
+  --yellow: #B98900; --yellow-bg: #FBF1D8;
+  --red: #B23A2E; --red-bg: #FBE7E4;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; }
+body { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Header ── */
+header {
+  flex: 0 0 auto; position: relative; z-index: 10;
+  display: flex; align-items: center; gap: 10px;
+  padding: .6rem 1rem; background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+.header-text { flex: 1 1 auto; min-width: 0; }
+.eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); font-weight: 700; margin: 0 0 .1rem; }
+h1 { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(15px, 2vw, 20px); margin: 0; }
+
+.header-btn {
+  flex: 0 0 auto; text-decoration: none; color: var(--navy);
+  font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid var(--line-strong); padding: 6px 12px; border-radius: 8px;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  white-space: nowrap;
+}
+.header-btn:hover { background: var(--cream); }
+
+/* ── Toolbar ── */
+main { flex: 1 1 auto; padding: 20px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+.toolbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.search-input {
+  flex: 1 1 280px; max-width: 420px;
+  border: 1px solid var(--line-strong); border-radius: 8px;
+  padding: 9px 14px; font-size: 14px; font-family: 'Inter', sans-serif;
+  color: var(--ink); background: var(--paper); outline: none;
+}
+.search-input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,58,75,0.1); }
+.result-count { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: 12px; overflow: hidden; overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead tr { background: var(--cream); }
+th {
+  text-align: left; padding: 10px 14px;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-soft); border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #FAFAF7; }
+
+/* ── Columns ── */
+.col-map { width: 44px; text-align: center; padding: 8px 6px; }
+.col-location { min-width: 160px; }
+.col-remarks { max-width: 200px; color: var(--ink-soft); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-date { white-space: nowrap; color: var(--ink-soft); font-size: 12px; }
+.coords { font-size: 11px; color: var(--ink-soft); font-family: monospace; }
+
+/* ── Map button ── */
+.map-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 7px;
+  border: 1px solid var(--line-strong); background: var(--paper);
+  text-decoration: none; font-size: 15px;
+  transition: background .15s;
+}
+.map-btn:hover { background: var(--cream); }
+
+/* ── Risk chips ── */
+.risk-chip {
+  display: inline-block; font-size: 10.5px; font-weight: 700;
+  letter-spacing: .02em; padding: 3px 8px; border-radius: 5px;
+  white-space: nowrap;
+}
+.risk-green  { background: var(--green-bg);  color: var(--green); }
+.risk-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.risk-red    { background: var(--red-bg);    color: var(--red); }
+
+/* ── States ── */
+.loading-row td { text-align: center; color: var(--ink-soft); padding: 32px; }
+.empty-note { text-align: center; color: var(--ink-soft); margin-top: 40px; font-size: 14px; }
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  main { padding: 12px; }
+  header { padding: .5rem .65rem; gap: 8px; }
+  .header-btn { padding: 5px 8px; font-size: 11px; }
+  h1 { font-size: 14px; }
+  .eyebrow { font-size: 10px; }
+  th, td { padding: 9px 10px; }
+}

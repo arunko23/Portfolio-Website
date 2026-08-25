@@ -19,6 +19,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         o.name as obstacle_risk, 
         b.name as burnout_risk, 
         a.name as animal_risk, 
+        se.name as security_risk,
+        si.name as size_risk,
         s.remarks, 
         s.image_url, 
         s.created_at
@@ -27,6 +29,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       JOIN risks o ON s.obstacle_risk_id = o.id
       JOIN risks b ON s.burnout_risk_id = b.id
       JOIN risks a ON s.animal_risk_id = a.id
+      JOIN risks se ON s.security_risk_id = se.id
+      JOIN risks si ON s.size_risk_id = si.id
     `;
     
     let stmt;

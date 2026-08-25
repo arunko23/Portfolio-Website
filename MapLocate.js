@@ -216,7 +216,7 @@
   function overallColor(pin){
     const order = { Low:0, Medium:1, High:2 };
     let max = 'Low';
-    [pin.obstacleRisk, pin.burnoutRisk, pin.animalRisk].forEach(r => {
+    [pin.obstacleRisk, pin.burnoutRisk, pin.animalRisk, pin.securityRisk, pin.sizeRisk].forEach(r => {
       if (order[r] > order[max]) max = r;
     });
     return riskColor(max);
@@ -274,6 +274,8 @@
           <span class="risk-chip risk-${pin.obstacleRisk.toLowerCase()}">Obstacle ${pin.obstacleRisk}</span>
           <span class="risk-chip risk-${pin.burnoutRisk.toLowerCase()}">Burnout ${pin.burnoutRisk}</span>
           <span class="risk-chip risk-${pin.animalRisk.toLowerCase()}">Animal ${pin.animalRisk}</span>
+          <span class="risk-chip risk-${pin.securityRisk.toLowerCase()}">Security ${pin.securityRisk}</span>
+          <span class="risk-chip risk-${pin.sizeRisk.toLowerCase()}">Size ${pin.sizeRisk}</span>
         </div>
         ${pin.remarks ? `<p class="pop-notes">${escapeHtml(pin.remarks)}</p>` : ''}
         ${pin.photo ? `<img class="pop-photo" src="${pin.photo}" />` : ''}
@@ -361,6 +363,8 @@
     document.getElementById('obstacleRisk').value = 'Low';
     document.getElementById('burnoutRisk').value = 'Low';
     document.getElementById('animalRisk').value = 'Low';
+    document.getElementById('securityRisk').value = 'Low';
+    document.getElementById('sizeRisk').value = 'Low';
     document.getElementById('remarks').value = '';
     photoInput.value = '';
     pendingPhoto = null;
@@ -410,6 +414,8 @@
     const obstacleRisk = document.getElementById('obstacleRisk').value;
     const burnoutRisk  = document.getElementById('burnoutRisk').value;
     const animalRisk   = document.getElementById('animalRisk').value;
+    const securityRisk = document.getElementById('securityRisk').value;
+    const sizeRisk     = document.getElementById('sizeRisk').value;
     const remarks      = document.getElementById('remarks').value.trim();
 
     const saveBtn = pinForm.querySelector('.btn-primary');
@@ -425,6 +431,8 @@
       fd.append('obstacle_risk_id', String(RISK_ID[obstacleRisk] || 1));
       fd.append('burnout_risk_id',  String(RISK_ID[burnoutRisk]  || 1));
       fd.append('animal_risk_id',   String(RISK_ID[animalRisk]   || 1));
+      fd.append('security_risk_id', String(RISK_ID[securityRisk] || 1));
+      fd.append('size_risk_id',     String(RISK_ID[sizeRisk]     || 1));
       fd.append('remarks',          remarks);
 
       // Attach photo if one was selected (convert base64 data URL → File blob)
@@ -482,6 +490,8 @@
           obstacleRisk: s.obstacle_risk,
           burnoutRisk:  s.burnout_risk,
           animalRisk:   s.animal_risk,
+          securityRisk: s.security_risk,
+          sizeRisk:     s.size_risk,
           remarks:      s.remarks || '',
           photo:        s.image_url || null,
           loggedAt:     new Date(s.created_at).getTime()

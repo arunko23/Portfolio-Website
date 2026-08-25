@@ -59,6 +59,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const obstacleRiskId = parseInt(formData.get("obstacle_risk_id") as string);
     const burnoutRiskId  = parseInt(formData.get("burnout_risk_id") as string);
     const animalRiskId   = parseInt(formData.get("animal_risk_id") as string);
+    const securityRiskId = parseInt(formData.get("security_risk_id") as string);
+    const sizeRiskId     = parseInt(formData.get("size_risk_id") as string);
     const remarks        = formData.get("remarks") as string;
     const photo          = formData.get("photo") as File | null;
 
@@ -66,7 +68,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       !sector ||
       isNaN(lat) || isNaN(lng) ||
       !pic ||
-      isNaN(obstacleRiskId) || isNaN(burnoutRiskId) || isNaN(animalRiskId)
+      isNaN(obstacleRiskId) || isNaN(burnoutRiskId) || isNaN(animalRiskId) || isNaN(securityRiskId) || isNaN(sizeRiskId)
     ) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
@@ -115,10 +117,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // 4. Insert submission into D1 (image_url is the full ImageKit HTTPS URL, or null)
     await env.DB.prepare(
       `INSERT INTO submissions
-        (location_id, pic, obstacle_risk_id, burnout_risk_id, animal_risk_id, remarks, image_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
+        (location_id, pic, obstacle_risk_id, burnout_risk_id, animal_risk_id, security_risk_id, size_risk_id, remarks, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(locationId, pic, obstacleRiskId, burnoutRiskId, animalRiskId, remarks || null, imageUrl)
+      .bind(locationId, pic, obstacleRiskId, burnoutRiskId, animalRiskId, securityRiskId, sizeRiskId, remarks || null, imageUrl)
       .run();
 
     // 5. Return the same response format as before

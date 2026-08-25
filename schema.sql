@@ -33,13 +33,17 @@ CREATE TABLE submissions (
     obstacle_risk_id INTEGER NOT NULL,
     burnout_risk_id INTEGER NOT NULL,
     animal_risk_id INTEGER NOT NULL,
+    security_risk_id INTEGER NOT NULL,
+    size_risk_id INTEGER NOT NULL,
     remarks TEXT,
     image_url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (location_id) REFERENCES locations(id),
     FOREIGN KEY (obstacle_risk_id) REFERENCES risks(id),
     FOREIGN KEY (burnout_risk_id) REFERENCES risks(id),
-    FOREIGN KEY (animal_risk_id) REFERENCES risks(id)
+    FOREIGN KEY (animal_risk_id) REFERENCES risks(id),
+    FOREIGN KEY (security_risk_id) REFERENCES risks(id),
+    FOREIGN KEY (size_risk_id) REFERENCES risks(id)
 );
 
 -- Seed initial risks data

@@ -13,6 +13,13 @@ CREATE TABLE ht_lines (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE cable_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    line_group TEXT,
+    coordinates TEXT NOT NULL
+);
+
 CREATE TABLE risks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE

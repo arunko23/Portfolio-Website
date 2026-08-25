@@ -870,110 +870,105 @@
     return canvas;
   }
 
-  function ensureKmzLayers(){
-    if (!map.getSource('kmz-cables-source') && typeof KMZ_CABLES_DATA !== 'undefined'){
-      map.addSource('kmz-cables-source', { type: 'geojson', data: KMZ_CABLES_DATA });
-      const kmzCountEl = document.getElementById('kmzCount');
-      if (kmzCountEl) kmzCountEl.textContent = KMZ_CABLES_DATA.features.length.toLocaleString() + ' cable features loaded';
+  // --- CABLE LINES FROM DB ---
+  let cablesLoaded = false;
+  let cablesLoading = false;
+
+  async function loadCablesFromDB(){
+    if (cablesLoaded || cablesLoading) return;
+    cablesLoading = true;
+
+    const kmzCountEl = document.getElementById('kmzCount');
+    if (kmzCountEl) kmzCountEl.textContent = 'Loading cables…';
+
+    try {
+      const res = await fetch('/cables');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const geojson = await res.json();
+
+      // Add source with only LineString features (server already filters out towers)
+      if (!map.getSource('kmz-cables-source')) {
+        map.addSource('kmz-cables-source', { type: 'geojson', data: geojson });
+      }
+
+      // Lines-only layer — no tower/symbol layer
+      if (!map.getLayer('kmz-lines-layer')) {
+        map.addLayer({
+          id: 'kmz-lines-layer',
+          type: 'line',
+          source: 'kmz-cables-source',
+          paint: { 'line-color': '#C9781D', 'line-width': 2 }
+        });
+
+        map.on('click', 'kmz-lines-layer', function(e) {
+          const f = e.features[0];
+          const name  = (f.properties.name  || '').trim();
+          const group = (f.properties.group || '').trim();
+          new maplibregl.Popup({ offset: 8, closeButton: false })
+            .setLngLat(e.lngLat)
+            .setHTML(`
+              <div class="pop-wrap">
+                <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">&times;</button>
+                <p class="pop-title" style="font-size:14px;">${escapeHtml(name || 'Cable line')}</p>
+                ${group ? `<p class="pop-coords-inline">${escapeHtml(group)}</p>` : ''}
+              </div>
+            `)
+            .addTo(map);
+        });
+        map.on('mouseenter', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = ''; });
+      }
+
+      cablesLoaded = true;
+      if (kmzCountEl) kmzCountEl.textContent = geojson.features.length.toLocaleString() + ' cable lines loaded';
+    } catch(err) {
+      console.error('Failed to load cable lines:', err);
+      if (kmzCountEl) kmzCountEl.textContent = 'Failed to load cables';
+    } finally {
+      cablesLoading = false;
     }
-    if (!map.getLayer('kmz-lines-layer')){
+
+    setKmzVisibility(kmzVisible);
+  }
+
+  function ensureKmzLayers(){
+    // Reattach layer after style change
+    if (cablesLoaded && !map.getLayer('kmz-lines-layer') && map.getSource('kmz-cables-source')) {
       map.addLayer({
         id: 'kmz-lines-layer',
         type: 'line',
         source: 'kmz-cables-source',
         paint: { 'line-color': '#C9781D', 'line-width': 2 }
       });
-      const showKmzPopup = function(e){
-        const f = e.features[0];
-        const name = (f.properties.name || '').trim();
-        const group = (f.properties.group || '').trim();
-        new maplibregl.Popup({ offset: 8, closeButton: false })
-          .setLngLat(e.lngLat)
-          .setHTML(`
-            <div class="pop-wrap">
-              <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">&times;</button>
-              <p class="pop-title" style="font-size:14px;">${escapeHtml(name || 'Cable feature')}</p>
-              ${group ? `<p class="pop-coords-inline">${escapeHtml(group)}</p>` : ''}
-            </div>
-          `)
-          .addTo(map);
-      };
-      map.on('click', 'kmz-lines-layer', showKmzPopup);
-      map.on('mouseenter', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'kmz-lines-layer', () => { map.getCanvas().style.cursor = ''; });
-    }
-    if (!map.hasImage('ht-tower-icon')){
-      const _towerCanvas = makeTowerIconCanvas();
-      const _towerCtx = _towerCanvas.getContext('2d');
-      const _towerData = _towerCtx.getImageData(0, 0, _towerCanvas.width, _towerCanvas.height);
-      map.addImage('ht-tower-icon', { width: _towerCanvas.width, height: _towerCanvas.height, data: _towerData.data }, { pixelRatio: 3 });
-    }
-    if (!map.getLayer('kmz-points-layer')){
-      map.addLayer({
-        id: 'kmz-points-layer',
-        type: 'symbol',
-        source: 'kmz-cables-source',
-        layout: {
-          'icon-image': 'ht-tower-icon',
-          'icon-size': 0.6,
-          'icon-allow-overlap': true,
-          'icon-ignore-placement': true
-        }
-      });
-      map.on('click', 'kmz-points-layer', function(e){
-        const f = e.features[0];
-        const name = (f.properties.name || '').trim();
-        const group = (f.properties.group || '').trim();
-        const coords = f.geometry.coordinates;
-        new maplibregl.Popup({ offset: 8, closeButton: false })
-          .setLngLat(e.lngLat)
-          .setHTML(`
-            <div class="pop-wrap">
-              <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">&times;</button>
-              <p class="pop-title" style="font-size:14px;">${escapeHtml(name || 'Cable point')}</p>
-              ${group ? `<p class="pop-coords-inline">${escapeHtml(group)}</p>` : ''}
-              <p class="pop-coords-inline">${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}</p>
-            </div>
-          `)
-          .addTo(map);
-      });
-      map.on('mouseenter', 'kmz-points-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'kmz-points-layer', () => { map.getCanvas().style.cursor = ''; });
     }
     setKmzVisibility(kmzVisible);
   }
 
   function setKmzVisibility(visible){
     const vis = visible ? 'visible' : 'none';
-    ['kmz-lines-layer', 'kmz-points-layer'].forEach(id => {
-      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis);
-    });
-  }
-
-  function reapplyKmzLayers(){
-    ensureKmzLayers();
+    if (map.getLayer('kmz-lines-layer')) map.setLayoutProperty('kmz-lines-layer', 'visibility', vis);
   }
 
   map.on('styledata', function(){
     if (!map.isStyleLoaded()) return;
-    if (!map.getSource('kmz-cables-source') && typeof KMZ_CABLES_DATA !== 'undefined') {
-      reapplyKmzLayers();
-    }
+    if (cablesLoaded) ensureKmzLayers();
   });
 
   if (kmzToggleBtn) {
-    kmzToggleBtn.addEventListener('click', function(){
+    kmzToggleBtn.addEventListener('click', async function(){
       kmzVisible = !kmzVisible;
       kmzToggleBtn.classList.toggle('active', kmzVisible);
-      setKmzVisibility(kmzVisible);
+      // Lazy-load cables from DB on first toggle
+      if (kmzVisible && !cablesLoaded) {
+        await loadCablesFromDB();
+      } else {
+        setKmzVisibility(kmzVisible);
+      }
     });
   }
 
   map.on('load', function(){
-    if (typeof KMZ_CABLES_DATA !== 'undefined') {
-      ensureKmzLayers();
-      if (kmzToggleBtn) kmzToggleBtn.classList.add('active');
-    }
+    // Cables are NOT auto-loaded on startup — they are lazy-loaded on first toggle click
     ensureHtMapLayers();
     loadPins();
     loadLines();

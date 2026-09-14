@@ -362,17 +362,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentPlot = null;
 
   function updateValuesAndPlot() {
-    const nr = parseFloat(sliderNr.value);
-    const tq = parseFloat(sliderTq.value);
-    const pa = parseFloat(sliderPa.value);
-    const ng = parseFloat(sliderNg.value);
-    const oat = parseFloat(sliderOat.value);
-
-    valNr.textContent = nr + ' RPM';
-    valTq.textContent = tq + '%';
-    valPa.textContent = pa.toLocaleString() + ' ft';
-    valNg.textContent = ng.toFixed(1) + '%';
-    valOat.textContent = (oat >= 0 ? '+' : '') + oat + '°C';
+    const nr  = parseFloat(sliderNr.value)  || 394;
+    const tq  = parseFloat(sliderTq.value)  || 80;
+    const pa  = parseFloat(sliderPa.value)  || 0;
+    const ng  = parseFloat(sliderNg.value)  || 97.5;
+    const oat = parseFloat(sliderOat.value) || 0;
 
     currentPlot = calculatePlot(nr, tq, pa, ng, oat);
     renderPlotOnCanvas(ctx, currentPlot, chkLabels.checked);

@@ -38,48 +38,43 @@
       <h2 class="card-title">Flight Parameters</h2>
 
       <div class="field-group">
-        <div class="field-header">
-          <label for="inputNr">Rotor Speed (NR)</label>
-          <span class="field-val" id="valNr">394 RPM</span>
+        <label for="sliderNr">Rotor Speed (NR)</label>
+        <div class="input-row">
+          <input type="number" id="sliderNr" step="1" value="394" />
+          <span class="input-unit">RPM</span>
         </div>
-        <input type="range" id="sliderNr" min="380" max="400" step="1" value="394" />
-        <div class="field-meta">Range: 380 – 400 RPM</div>
       </div>
 
       <div class="field-group">
-        <div class="field-header">
-          <label for="inputTq">Engine Torque (TQ)</label>
-          <span class="field-val" id="valTq">80%</span>
+        <label for="sliderTq">Engine Torque (TQ)</label>
+        <div class="input-row">
+          <input type="number" id="sliderTq" step="0.5" value="80" />
+          <span class="input-unit">%</span>
         </div>
-        <input type="range" id="sliderTq" min="50" max="95" step="0.5" value="80" />
-        <div class="field-meta">Range: 50 – 95%</div>
       </div>
 
       <div class="field-group">
-        <div class="field-header">
-          <label for="inputPa">Pressure Altitude (PA)</label>
-          <span class="field-val" id="valPa">5,000 ft</span>
+        <label for="sliderPa">Pressure Altitude (PA)</label>
+        <div class="input-row">
+          <input type="number" id="sliderPa" step="100" value="5000" />
+          <span class="input-unit">ft</span>
         </div>
-        <input type="range" id="sliderPa" min="0" max="10000" step="100" value="5000" />
-        <div class="field-meta">Range: 0 – 10,000 ft</div>
       </div>
 
       <div class="field-group">
-        <div class="field-header">
-          <label for="inputNg">Gas Generator Speed (NG)</label>
-          <span class="field-val" id="valNg">97.5%</span>
+        <label for="sliderNg">Gas Generator Speed (NG)</label>
+        <div class="input-row">
+          <input type="number" id="sliderNg" step="0.1" value="97.5" />
+          <span class="input-unit">%</span>
         </div>
-        <input type="range" id="sliderNg" min="90" max="100" step="0.1" value="97.5" />
-        <div class="field-meta">Range: 90.0 – 100.0%</div>
       </div>
 
       <div class="field-group">
-        <div class="field-header">
-          <label for="inputOat">Outside Air Temp (OAT)</label>
-          <span class="field-val" id="valOat">+20°C</span>
+        <label for="sliderOat">Outside Air Temp (OAT)</label>
+        <div class="input-row">
+          <input type="number" id="sliderOat" step="1" value="20" />
+          <span class="input-unit">°C</span>
         </div>
-        <input type="range" id="sliderOat" min="-30" max="50" step="1" value="20" />
-        <div class="field-meta">Range: −30 to +50°C</div>
       </div>
     </div>
 

@@ -243,11 +243,11 @@ function drawLine(ctx, x1, y1, x2, y2, color, w = 2.5, dash = []) {
 
 function drawDot(ctx, x, y, color, fill = true) {
   ctx.save();
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.strokeStyle = color;
   ctx.fillStyle = fill ? color : '#fff';
   ctx.beginPath();
-  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.arc(x, y, 3, 0, Math.PI * 2);
   ctx.fill();
   if (!fill) ctx.stroke();
   ctx.restore();
@@ -318,43 +318,53 @@ function renderPlotOnCanvas(ctx, p, showLabels) {
   drawText(ctx, String(ng) + '%', gx + 14, oy - 20, BLUE, 20, 'left');
   drawText(ctx, (oat >= 0 ? '+' : '') + String(oat) + '°C', CHART.left - 10, oy, BLUE, 20, 'right');
   drawText(ctx, cls, CHART.right - 8, fy - 12, good ? GREEN : RED, 15, 'right');
+
+  // ── Draw conditions in the CONDITIONS box (bottom-left of chart) ──
+  const condItems = [
+    { label: 'NR',  value: `${nr} RPM` },
+    { label: 'TQ',  value: `${tq}%` },
+    { label: 'PA',  value: `${pa.toLocaleString()} ft` },
+    { label: 'NG',  value: `${ng.toFixed(1)}%` },
+    { label: 'OAT', value: `${oat >= 0 ? '+' : ''}${oat}°C` },
+  ];
+  const dashY = [706, 718, 729, 739, 750];
+  condItems.forEach((item, i) => {
+    drawText(ctx, `${item.label}: ${item.value}`, 48, dashY[i], '#111', 11.5, 'left');
+  });
+
+  // ── Draw result in the ENGINE POWER CHECK box (bottom-right of chart) ──
+  drawText(ctx, good ? '✓ CORRECT' : '✕ INCORRECT', 440, 762, good ? GREEN : RED, 18, 'center');
 }
 
 // ── Application UI & Event Wireup ──
 document.addEventListener('DOMContentLoaded', () => {
-  const sliderNr = document.getElementById('sliderNr');
-  const sliderTq = document.getElementById('sliderTq');
-  const sliderPa = document.getElementById('sliderPa');
-  const sliderNg = document.getElementById('sliderNg');
+  const sliderNr  = document.getElementById('sliderNr');
+  const sliderTq  = document.getElementById('sliderTq');
+  const sliderPa  = document.getElementById('sliderPa');
+  const sliderNg  = document.getElementById('sliderNg');
   const sliderOat = document.getElementById('sliderOat');
 
-  const valNr = document.getElementById('valNr');
-  const valTq = document.getElementById('valTq');
-  const valPa = document.getElementById('valPa');
-  const valNg = document.getElementById('valNg');
-  const valOat = document.getElementById('valOat');
-
-  const statusCard = document.getElementById('statusCard');
+  const statusCard      = document.getElementById('statusCard');
   const statusIndicator = document.getElementById('statusIndicator');
-  const statusTitle = document.getElementById('statusTitle');
-  const statusDesc = document.getElementById('statusDesc');
-  const statusDetails = document.getElementById('statusDetails');
+  const statusTitle     = document.getElementById('statusTitle');
+  const statusDesc      = document.getElementById('statusDesc');
+  const statusDetails   = document.getElementById('statusDetails');
 
-  const chkLabels = document.getElementById('chkLabels');
+  const chkLabels    = document.getElementById('chkLabels');
   const chkCrosshair = document.getElementById('chkCrosshair');
   const coordsReadout = document.getElementById('coordsReadout');
-  const readoutText = document.getElementById('readoutText');
+  const readoutText  = document.getElementById('readoutText');
 
-  const btnReset = document.getElementById('btnReset');
+  const btnReset  = document.getElementById('btnReset');
   const btnExport = document.getElementById('btnExport');
-  const btnPrint = document.getElementById('btnPrint');
+  const btnPrint  = document.getElementById('btnPrint');
 
-  const plotStage = document.getElementById('plotStage');
+  const plotStage  = document.getElementById('plotStage');
   const plotCanvas = document.getElementById('plotCanvas');
-  const ctx = plotCanvas.getContext('2d');
+  const ctx        = plotCanvas.getContext('2d');
 
-  const zoomIn = document.getElementById('zoomIn');
-  const zoomOut = document.getElementById('zoomOut');
+  const zoomIn    = document.getElementById('zoomIn');
+  const zoomOut   = document.getElementById('zoomOut');
   const zoomReset = document.getElementById('zoomReset');
   const zoomLevel = document.getElementById('zoomLevel');
 

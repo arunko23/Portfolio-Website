@@ -264,6 +264,8 @@
     return d.innerHTML;
   }
 
+  let activePinnedPopup = null;
+
   function popupHtml(id, pin){
     return `
       <div class="pop-wrap">
@@ -272,7 +274,7 @@
         <p class="pop-pic">PIC: ${escapeHtml(pin.pic)}</p>
         <div class="risk-row">
           <span class="risk-chip risk-${pin.obstacleRisk.toLowerCase()}">Obstacle ${pin.obstacleRisk}</span>
-          <span class="risk-chip risk-${pin.burnoutRisk.toLowerCase()}">Burnout ${pin.burnoutRisk}</span>
+          <span class="risk-chip risk-${pin.burnoutRisk.toLowerCase()}">Brownout ${pin.burnoutRisk}</span>
           <span class="risk-chip risk-${pin.animalRisk.toLowerCase()}">Animal ${pin.animalRisk}</span>
           <span class="risk-chip risk-${pin.securityRisk.toLowerCase()}">Security ${pin.securityRisk}</span>
           <span class="risk-chip risk-${pin.sizeRisk.toLowerCase()}">Size ${pin.sizeRisk}</span>
@@ -290,11 +292,75 @@
     el.className = 'marker-pin';
     el.style.backgroundColor = overallColor(pin);
 
-    const popup = new maplibregl.Popup({ offset: 12, closeButton: false }).setHTML(popupHtml(id, pin));
+    const popup = new maplibregl.Popup({ offset: 12, closeButton: false })
+      .setLngLat([pin.lng, pin.lat])
+      .setHTML(popupHtml(id, pin));
+
     const marker = new maplibregl.Marker({ element: el })
       .setLngLat([pin.lng, pin.lat])
-      .setPopup(popup)
       .addTo(map);
+
+    let isPinned = false;
+    let hoverTimer = null;
+
+    function openPopup(){
+      clearTimeout(hoverTimer);
+      if (!popup.isOpen()){
+        popup.addTo(map);
+      }
+    }
+
+    function scheduleClose(){
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        if (!isPinned && popup.isOpen()){
+          popup.remove();
+        }
+      }, 250);
+    }
+
+    el.addEventListener('mouseenter', openPopup);
+    el.addEventListener('mouseleave', scheduleClose);
+
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isPinned = !isPinned;
+      if (isPinned){
+        if (activePinnedPopup && activePinnedPopup !== popup){
+          activePinnedPopup.remove();
+        }
+        activePinnedPopup = popup;
+        openPopup();
+      } else {
+        if (activePinnedPopup === popup) activePinnedPopup = null;
+        popup.remove();
+      }
+    });
+
+    popup.on('open', () => {
+      const pEl = popup.getElement();
+      if (pEl){
+        pEl.addEventListener('mouseenter', () => {
+          clearTimeout(hoverTimer);
+        });
+        pEl.addEventListener('mouseleave', scheduleClose);
+      }
+    });
+
+    popup.on('close', () => {
+      if (activePinnedPopup === popup) activePinnedPopup = null;
+      isPinned = false;
+    });
+
+    marker._popup = popup;
+    marker._openPinned = () => {
+      isPinned = true;
+      if (activePinnedPopup && activePinnedPopup !== popup){
+        activePinnedPopup.remove();
+      }
+      activePinnedPopup = popup;
+      openPopup();
+    };
 
     savedMarkers[id] = marker;
   }
@@ -312,6 +378,7 @@
       return;
     }
     if (savedMarkers[id]){
+      if (savedMarkers[id]._popup) savedMarkers[id]._popup.remove();
       savedMarkers[id].remove();
       delete savedMarkers[id];
     }
@@ -502,8 +569,25 @@
       // Remove markers that are no longer in the DB
       for (const id of Object.keys(savedMarkers)) {
         if (!liveIds.has(id)) {
+          if (savedMarkers[id]._popup) savedMarkers[id]._popup.remove();
           savedMarkers[id].remove();
           delete savedMarkers[id];
+        }
+      }
+
+      // If URL has ?lat=&lng=, automatically open and pin the popup for the matching point
+      const urlParams = new URLSearchParams(window.location.search);
+      const deepLat = parseFloat(urlParams.get('lat'));
+      const deepLng = parseFloat(urlParams.get('lng'));
+      if (!isNaN(deepLat) && !isNaN(deepLng)) {
+        for (const s of submissions) {
+          if (Math.abs(s.lat - deepLat) < 0.0002 && Math.abs(s.lng - deepLng) < 0.0002) {
+            const m = savedMarkers[String(s.id)];
+            if (m && m._openPinned) {
+              m._openPinned();
+              break;
+            }
+          }
         }
       }
     } catch (e) {

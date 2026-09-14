@@ -73,7 +73,7 @@ tr:hover td { background: #FAFAF7; }
 /* ── Columns ── */
 .col-map { width: 44px; text-align: center; padding: 8px 6px; }
 .col-location { min-width: 160px; }
-.col-remarks { max-width: 200px; color: var(--ink-soft); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-remarks { min-width: 220px; max-width: 460px; color: var(--ink-soft); font-size: 12.5px; white-space: normal; word-break: break-word; line-height: 1.45; }
 .col-date { white-space: nowrap; color: var(--ink-soft); font-size: 12px; }
 .coords { font-size: 11px; color: var(--ink-soft); font-family: monospace; }
 

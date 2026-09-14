@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #ebe6dc;
+  --color-bg-elevated: #f7f4ee;
+  --color-bg-inset: #e2dcd0;
+  --color-fg: #1b242e;
+  --color-fg-muted: #5c6774;
+  --color-fg-subtle: #7a8490;
+  --color-border: #cfc6b6;
+  --color-border-strong: #b7ad9b;
+  --color-accent: #1e3a54;
+  --color-accent-fg: #f7f4ee;
+  --color-accent-hover: #163044;
+  --color-correct: #1f7a45;
+  --color-correct-bg: #e5f4ea;
+  --color-incorrect: #b42318;
+  --color-incorrect-bg: #f8e6e4;
+  --color-line-blue: #1457d9;
+  --color-line-red: #c41212;
+  --color-ink: #102235;
+  --color-paper: #f7f4ee;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --font-sans: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --shadow-panel: 0 1px 0 rgb(27 36 46 / 0.04), 0 8px 24px rgb(16 34 53 / 0.08);
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html,
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    opacity: 1;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
+/* Portrait is the flight-manual page. Landscape is optional via print options. */
+@page {
+  size: A4 portrait;
+  margin: 8mm;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .app-shell {
+    min-height: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  main.print-main {
+    display: block !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-chart-panel {
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .print-chart-frame {
+    overflow: visible !important;
+    border: none !important;
+    background: #fff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    justify-content: center;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  #plot-stage {
+    position: relative !important;
+    max-width: 100% !important;
+    background: #fff !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  #plot-stage img,
+  #plot-stage canvas {
+    max-width: none !important;
+  }
+
+  #plot-stage img {
+    display: block;
+    position: relative;
+  }
+
+  #plot-stage canvas {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  .print-header {
+    margin: 0 0 4mm;
+    color: #111;
+  }
+
+  .print-kicker {
+    margin: 0;
+    font-size: 8.5pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5c6774;
+    font-weight: 600;
+  }
+
+  .print-header h1 {
+    margin: 1mm 0 0;
+    font-size: 14pt;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .print-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8mm;
+  }
+
+  .print-result {
+    flex: none;
+    border: 1.5pt solid #b7ad9b;
+    border-radius: 4px;
+    padding: 1.5mm 4mm;
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .print-result-correct {
+    border-color: #1f7a45;
+    background: #e5f4ea;
+    color: #1f7a45;
+  }
+
+  .print-result-incorrect {
+    border-color: #b42318;
+    background: #f8e6e4;
+    color: #b42318;
+  }
+
+  .print-params {
+    width: 100%;
+    margin-top: 3mm;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 8.5pt;
+  }
+
+  .print-params th {
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 7pt;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #5c6774;
+    padding: 0 3mm 1mm 0;
+    border-bottom: 0.6pt solid #cfc6b6;
+  }
+
+  .print-params td {
+    padding: 1.5mm 3mm 0 0;
+    font-weight: 500;
+  }
+
+  .print-disclaimer {
+    display: block !important;
+    margin-top: 3mm;
+    font-size: 7pt;
+    line-height: 1.35;
+    color: #5c6774;
+  }
+
+  /* A4 portrait — chart is 596×847, same ratio as the manual page */
+  html[data-print-paper="A4"][data-print-orient="portrait"] #plot-stage {
+    height: 232mm !important;
+    width: calc(232mm * 596 / 847) !important;
+  }
+
+  html[data-print-paper="letter"][data-print-orient="portrait"] #plot-stage {
+    height: 216mm !important;
+    width: calc(216mm * 596 / 847) !important;
+  }
+
+  html[data-print-paper="A4"][data-print-orient="landscape"] #plot-stage {
+    height: 168mm !important;
+    width: calc(168mm * 596 / 847) !important;
+  }
+
+  html[data-print-paper="letter"][data-print-orient="landscape"] #plot-stage {
+    height: 160mm !important;
+    width: calc(160mm * 596 / 847) !important;
+  }
+
+  html[data-print-orient="portrait"] #plot-stage img,
+  html[data-print-orient="portrait"] #plot-stage canvas,
+  html[data-print-orient="landscape"] #plot-stage img,
+  html[data-print-orient="landscape"] #plot-stage canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

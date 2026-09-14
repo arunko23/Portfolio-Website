@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AS350 B2 Engine Power Check Chart Plotter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="chart.css" />
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <p class="eyebrow">Eurocopter / Airbus AS350 B2</p>
+    <h1>Engine Power Check Plotter <span class="chart-subtitle">Figure 1 (Arriel 1D1)</span></h1>
+  </div>
+  <div class="header-actions">
+    <a href="MapLocate.html" class="header-btn" title="Open MapLocate">🌐 MapLocate</a>
+    <a href="index.html" class="header-btn">← Back to Home</a>
+  </div>
+</header>
+
+<main class="main-layout">
+  <!-- Controls Sidebar -->
+  <aside class="sidebar">
+    <div class="card result-card" id="statusCard">
+      <div class="status-header">
+        <span class="status-indicator" id="statusIndicator">●</span>
+        <span class="status-title" id="statusTitle">Calculating…</span>
+      </div>
+      <p class="status-desc" id="statusDesc">Verify flight manual engine performance margin.</p>
+      <div class="status-details" id="statusDetails"></div>
+    </div>
+
+    <!-- Parameter Form -->
+    <div class="card params-card">
+      <h2 class="card-title">Flight Parameters</h2>
+
+      <div class="field-group">
+        <div class="field-header">
+          <label for="inputNr">Rotor Speed (NR)</label>
+          <span class="field-val" id="valNr">394 RPM</span>
+        </div>
+        <input type="range" id="sliderNr" min="380" max="400" step="1" value="394" />
+        <div class="field-meta">Range: 380 – 400 RPM</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-header">
+          <label for="inputTq">Engine Torque (TQ)</label>
+          <span class="field-val" id="valTq">80%</span>
+        </div>
+        <input type="range" id="sliderTq" min="50" max="95" step="0.5" value="80" />
+        <div class="field-meta">Range: 50 – 95%</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-header">
+          <label for="inputPa">Pressure Altitude (PA)</label>
+          <span class="field-val" id="valPa">5,000 ft</span>
+        </div>
+        <input type="range" id="sliderPa" min="0" max="10000" step="100" value="5000" />
+        <div class="field-meta">Range: 0 – 10,000 ft</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-header">
+          <label for="inputNg">Gas Generator Speed (NG)</label>
+          <span class="field-val" id="valNg">97.5%</span>
+        </div>
+        <input type="range" id="sliderNg" min="90" max="100" step="0.1" value="97.5" />
+        <div class="field-meta">Range: 90.0 – 100.0%</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-header">
+          <label for="inputOat">Outside Air Temp (OAT)</label>
+          <span class="field-val" id="valOat">+20°C</span>
+        </div>
+        <input type="range" id="sliderOat" min="-30" max="50" step="1" value="20" />
+        <div class="field-meta">Range: −30 to +50°C</div>
+      </div>
+    </div>
+
+    <!-- Toolbar Actions -->
+    <div class="card actions-card">
+      <div class="action-row">
+        <button type="button" class="btn btn-secondary" id="btnReset">↺ Reset Defaults</button>
+        <button type="button" class="btn btn-secondary" id="btnExport">📥 Export CSV</button>
+        <button type="button" class="btn btn-primary" id="btnPrint">🖨️ Print Chart</button>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <input type="checkbox" id="chkLabels" checked />
+          <span>Show value labels on chart</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chkCrosshair" />
+          <span>Crosshair coordinate inspector</span>
+        </label>
+      </div>
+      <div class="coords-readout" id="coordsReadout" style="display:none;">
+        Coordinates: <span id="readoutText">Click chart to inspect</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Plot Canvas Stage -->
+  <section class="stage-section">
+    <div class="stage-header">
+      <span class="stage-tag">AS350 B2 · Figure 1 Engine Power Check Chart</span>
+      <div class="zoom-controls">
+        <button type="button" class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+        <span class="zoom-level" id="zoomLevel">100%</span>
+        <button type="button" class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+        <button type="button" class="zoom-btn zoom-fit" id="zoomReset" title="Reset Zoom">Fit</button>
+      </div>
+    </div>
+
+    <div class="canvas-viewport" id="viewport">
+      <div class="plot-stage" id="plotStage">
+        <img src="chart.png" alt="AS350 B2 Figure 1 engine power check chart" id="chartImg" width="596" height="847" draggable="false" />
+        <canvas id="plotCanvas" width="596" height="847"></canvas>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="chart-curves.js"></script>
+<script src="chart.js"></script>
+</body>
+</html>

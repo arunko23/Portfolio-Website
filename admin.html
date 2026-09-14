@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Camera Admin · MapLocate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F3ED; --paper: #FFFFFF; --ink: #1C2128; --ink-soft: #5B6068;
+    --navy: #1B3A4B; --navy-dark: #12262F; --line: #DCD9CF; --line-strong: #C3BFAF;
+    --green: #2E7D4F; --green-bg: #E5F3EA; --red: #B23A2E; --red-bg: #FBE7E4;
+    --yellow: #B98900; --yellow-bg: #FBF1D8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--cream); color: var(--ink); font-family: 'Inter', sans-serif; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: .75rem 1.25rem; background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .header-left .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); font-weight: 700; margin: 0 0 .1rem; }
+  .header-left h1 { font-family: 'Fraunces', serif; font-size: clamp(16px, 2.2vw, 22px); font-weight: 600; margin: 0; }
+  .header-actions { display: flex; gap: 8px; }
+  .hdr-btn {
+    text-decoration: none; color: var(--navy); font-weight: 600; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--line-strong); padding: 7px 13px; border-radius: 8px;
+    background: var(--paper); transition: all .15s;
+  }
+  .hdr-btn:hover { background: var(--cream); border-color: var(--navy); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 28px 20px; }
+
+  /* ── Card ── */
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin: 0 0 18px; }
+
+  /* ── Form ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+  label .opt { font-weight: 400; color: var(--ink-soft); }
+  input, textarea {
+    border: 1px solid var(--line-strong); border-radius: 8px;
+    padding: 9px 12px; font-size: 14px; font-family: 'Inter', sans-serif;
+    color: var(--ink); background: var(--paper); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, textarea:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,58,75,0.1); }
+  textarea { resize: vertical; min-height: 72px; }
+  .field-hint { font-size: 11px; color: var(--ink-soft); }
+
+  /* ── Lat/Lng helper ── */
+  .coords-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pick-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--cream); color: var(--navy); border: 1px solid var(--line-strong);
+    border-radius: 7px; padding: 7px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 6px;
+    transition: all .15s;
+  }
+  .pick-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+  /* ── Submit button ── */
+  .submit-row { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; gap: 12px; }
+  .btn-submit {
+    background: var(--navy); color: #fff; border: none; border-radius: 9px;
+    padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px;
+    transition: background .15s;
+  }
+  .btn-submit:hover { background: var(--navy-dark); }
+  .btn-submit:disabled { opacity: .55; cursor: not-allowed; }
+  .form-feedback { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 7px; display: none; }
+  .form-feedback.ok  { background: var(--green-bg);  color: var(--green); display: block; }
+  .form-feedback.err { background: var(--red-bg);    color: var(--red);   display: block; }
+
+  /* ── Camera Table ── */
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--cream); }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAFAF7; }
+
+  .cam-name { font-weight: 600; }
+  .cam-desc { font-size: 12px; color: var(--ink-soft); }
+  .cam-coords { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-soft); }
+  .yt-link { color: #FF0000; text-decoration: none; font-weight: 600; font-size: 12px; }
+  .yt-link:hover { text-decoration: underline; }
+
+  /* Status badge */
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .badge-live { background: var(--green-bg); color: var(--green); }
+  .badge-off  { background: var(--yellow-bg); color: var(--yellow); }
+
+  /* Actions */
+  .action-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+  .act-btn {
+    font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 7px;
+    border: 1px solid var(--line-strong); background: var(--paper); cursor: pointer;
+    font-family: 'Inter', sans-serif; color: var(--ink); transition: all .15s;
+  }
+  .act-btn:hover { background: var(--cream); }
+  .act-btn.danger { color: var(--red); border-color: #F0B8B4; }
+  .act-btn.danger:hover { background: var(--red-bg); border-color: var(--red); }
+
+  .loading-row td { text-align: center; color: var(--ink-soft); padding: 28px; }
+  .empty-state { text-align: center; color: var(--ink-soft); padding: 36px 20px; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .coords-row { grid-template-columns: 1fr; }
+    main { padding: 16px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <p class="eyebrow">MapLocate Admin</p>
+    <h1>📷 Live Camera Management</h1>
+  </div>
+  <div class="header-actions">
+    <a href="MapLocate.html" class="hdr-btn">🗺️ Open Map</a>
+    <a href="index.html" class="hdr-btn">← Home</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- Add Camera Form -->
+  <div class="card">
+    <p class="card-title">Add New Camera</p>
+
+    <form id="addForm" autocomplete="off">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label for="fName">Location / Camera Name</label>
+          <input type="text" id="fName" placeholder="e.g. Kathmandu Valley Cam" required />
+        </div>
+
+        <div class="field full">
+          <label for="fDesc">Description <span class="opt">(optional)</span></label>
+          <textarea id="fDesc" placeholder="e.g. Live feed overlooking Runway 02/20 from Nagarkot tower"></textarea>
+        </div>
+
+        <div class="field full">
+          <label>Coordinates</label>
+          <div class="coords-row">
+            <div class="field">
+              <input type="number" id="fLat" step="any" placeholder="Latitude e.g. 27.6981" required />
+            </div>
+            <div class="field">
+              <input type="number" id="fLng" step="any" placeholder="Longitude e.g. 85.3592" required />
+            </div>
+          </div>
+          <a href="MapLocate.html" target="_blank" class="pick-btn">📍 Open map to find coordinates</a>
+          <span class="field-hint">Tip: In MapLocate, hover/click a spot → coordinates appear in the popup. You can also right-click on Google Maps and select "What's here".</span>
+        </div>
+
+        <div class="field full">
+          <label for="fYt">YouTube Live URL</label>
+          <input type="url" id="fYt" placeholder="https://www.youtube.com/watch?v=LIVE_ID" required />
+          <span class="field-hint">Paste the full YouTube URL. Works for both live streams and recorded videos.</span>
+        </div>
+
+      </div>
+
+      <div class="submit-row">
+        <div id="formFeedback" class="form-feedback"></div>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          ➕ Add Camera
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Camera List -->
+  <div class="card">
+    <p class="card-title">All Cameras</p>
+
+    <div class="table-wrap">
+      <table id="camTable">
+        <thead>
+          <tr>
+            <th>Name &amp; Description</th>
+            <th>Coordinates</th>
+            <th>YouTube</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="camBody">
+          <tr class="loading-row"><td colspan="5">Loading cameras…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const formFeedback = document.getElementById('formFeedback');
+  const submitBtn = document.getElementById('submitBtn');
+  const camBody = document.getElementById('camBody');
+
+  // ── Load all cameras (including inactive) ──
+  async function loadCameras() {
+    try {
+      const res = await fetch('/cameras?all=1');
+      const cameras = await res.json();
+      renderTable(cameras);
+    } catch (e) {
+      camBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#B23A2E;padding:20px">Failed to load cameras.</td></tr>`;
+    }
+  }
+
+  function renderTable(cameras) {
+    if (!cameras || cameras.length === 0) {
+      camBody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No cameras yet. Add one above to get started.</div></td></tr>`;
+      return;
+    }
+
+    camBody.innerHTML = cameras.map(cam => `
+      <tr id="row-${cam.id}">
+        <td>
+          <div class="cam-name">${esc(cam.name)}</div>
+          ${cam.description ? `<div class="cam-desc">${esc(cam.description)}</div>` : ''}
+        </td>
+        <td class="cam-coords">${Number(cam.lat).toFixed(4)}°N<br>${Number(cam.lng).toFixed(4)}°E</td>
+        <td><a class="yt-link" href="${esc(cam.youtube_url)}" target="_blank" rel="noopener">▶ Watch</a></td>
+        <td>
+          ${cam.is_active
+            ? `<span class="badge badge-live">● Live</span>`
+            : `<span class="badge badge-off">○ Off</span>`}
+        </td>
+        <td>
+          <div class="action-btns">
+            <button class="act-btn" onclick="toggleCamera(${cam.id}, ${cam.is_active ? 0 : 1})">
+              ${cam.is_active ? '⏸ Disable' : '▶ Enable'}
+            </button>
+            <button class="act-btn danger" onclick="deleteCamera(${cam.id}, '${esc(cam.name)}')">
+              🗑 Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  // ── Toggle active state ──
+  async function toggleCamera(id, newState) {
+    try {
+      const res = await fetch('/toggle-camera', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_active: newState }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      await loadCameras();
+    } catch (e) {
+      alert('Could not update camera status. Try again.');
+    }
+  }
+
+  // ── Delete camera ──
+  async function deleteCamera(id, name) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/toggle-camera?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed');
+      await loadCameras();
+    } catch (e) {
+      alert('Could not delete camera. Try again.');
+    }
+  }
+
+  // ── Add camera form ──
+  document.getElementById('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formFeedback.className = 'form-feedback';
+    formFeedback.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+
+    const payload = {
+      name:        document.getElementById('fName').value.trim(),
+      description: document.getElementById('fDesc').value.trim() || undefined,
+      lat:         parseFloat(document.getElementById('fLat').value),
+      lng:         parseFloat(document.getElementById('fLng').value),
+      youtube_url: document.getElementById('fYt').value.trim(),
+    };
+
+    try {
+      const res = await fetch('/add-camera', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+
+      formFeedback.textContent = '✓ Camera added successfully!';
+      formFeedback.className = 'form-feedback ok';
+      document.getElementById('addForm').reset();
+      await loadCameras();
+    } catch (err) {
+      formFeedback.textContent = '✗ ' + err.message;
+      formFeedback.className = 'form-feedback err';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '➕ Add Camera';
+    }
+  });
+
+  // Initial load
+  loadCameras();
+</script>
+</body>
+</html>

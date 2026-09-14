@@ -385,6 +385,98 @@
     updateCount();
   };
 
+  // ── LIVE CAMERA MARKERS ──────────────────────────────────────────────────
+
+  function cameraPopupHtml(cam) {
+    const coords = `${cam.lat.toFixed(4)}°N, ${cam.lng.toFixed(4)}°E`;
+    const desc = cam.description
+      ? `<p class="cam-pop-desc">${escapeHtml(cam.description)}</p>`
+      : '';
+    return `
+      <div class="cam-pop-wrap">
+        <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">✕</button>
+        <div class="cam-pop-header">
+          <span class="cam-live-dot"></span>
+          <span class="cam-live-label">Live</span>
+        </div>
+        <p class="cam-pop-title">📷 ${escapeHtml(cam.name)}</p>
+        ${desc}
+        <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer" class="cam-watch-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408z"/>
+          </svg>
+          Watch on YouTube
+        </a>
+        <p class="pop-coords">${coords}</p>
+      </div>
+    `;
+  }
+
+  function addCameraMarker(cam) {
+    const el = document.createElement('div');
+    el.className = 'camera-pin';
+    el.title = cam.name;
+
+    const popup = new maplibregl.Popup({ offset: 18, closeButton: false })
+      .setLngLat([cam.lng, cam.lat])
+      .setHTML(cameraPopupHtml(cam));
+
+    new maplibregl.Marker({ element: el })
+      .setLngLat([cam.lng, cam.lat])
+      .addTo(map);
+
+    let isPinned = false;
+    let hoverTimer = null;
+
+    function openPopup() {
+      clearTimeout(hoverTimer);
+      if (!popup.isOpen()) popup.addTo(map);
+    }
+
+    function scheduleClose() {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        if (!isPinned && popup.isOpen()) popup.remove();
+      }, 250);
+    }
+
+    el.addEventListener('mouseenter', openPopup);
+    el.addEventListener('mouseleave', scheduleClose);
+
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isPinned = !isPinned;
+      if (isPinned) {
+        openPopup();
+      } else {
+        popup.remove();
+      }
+    });
+
+    popup.on('open', () => {
+      const pEl = popup.getElement();
+      if (pEl) {
+        pEl.addEventListener('mouseenter', () => clearTimeout(hoverTimer));
+        pEl.addEventListener('mouseleave', scheduleClose);
+      }
+    });
+
+    popup.on('close', () => { isPinned = false; });
+  }
+
+  async function loadCameras() {
+    try {
+      const res = await fetch('/cameras');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const cameras = await res.json();
+      for (const cam of cameras) {
+        addCameraMarker(cam);
+      }
+    } catch (e) {
+      console.error('Failed to load live cameras:', e);
+    }
+  }
+
   function placeTempMarker(lngLat, label){
     pendingLatLng = { lat: lngLat.lat, lng: lngLat.lng };
     if (tempMarker) tempMarker.remove();
@@ -1056,6 +1148,7 @@
     ensureHtMapLayers();
     loadPins();
     loadLines();
+    loadCameras();
 
     // Deep-link: if URL has ?lat=&lng=&zoom= (from submissions list), fly to that location
     const urlParams = new URLSearchParams(window.location.search);

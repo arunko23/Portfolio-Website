@@ -55,3 +55,14 @@ CREATE TABLE submissions (
 
 -- Seed initial risks data
 INSERT INTO risks (name) VALUES ('Low'), ('Medium'), ('High');
+
+CREATE TABLE IF NOT EXISTS live_cameras (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT NOT NULL,
+    description TEXT,
+    lat         REAL NOT NULL,
+    lng         REAL NOT NULL,
+    youtube_url TEXT NOT NULL,
+    is_active   INTEGER DEFAULT 1,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);

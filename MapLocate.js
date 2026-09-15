@@ -398,19 +398,25 @@
   }
 
   window.openCameraPopout = function(videoId, rawUrl) {
-    const w = 840;
-    const h = 520;
-    const left = Math.max(0, Math.round((window.screen.width - w) / 2));
-    const top = Math.max(0, Math.round((window.screen.height - h) / 2));
-    // Use the direct watch URL so YouTube doesn't trigger embed restrictions
     const targetUrl = videoId
       ? `https://www.youtube.com/watch?v=${videoId}`
       : rawUrl;
-    window.open(
-      targetUrl,
-      'LiveCam_' + (videoId || 'stream'),
-      `width=${w},height=${h},top=${top},left=${left},status=no,menubar=no,toolbar=no,location=no,resizable=yes`
-    );
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+    if (isMobile) {
+      // Mobile browsers block popup windows with dimensions. Open cleanly in new tab / YouTube app.
+      window.open(targetUrl, '_blank');
+    } else {
+      const w = 840;
+      const h = 520;
+      const left = Math.max(0, Math.round((window.screen.width - w) / 2));
+      const top = Math.max(0, Math.round((window.screen.height - h) / 2));
+      window.open(
+        targetUrl,
+        'LiveCam_' + (videoId || 'stream'),
+        `width=${w},height=${h},top=${top},left=${left},status=no,menubar=no,toolbar=no,location=no,resizable=yes`
+      );
+    }
   };
 
   function cameraPopupHtml(cam) {
@@ -432,7 +438,7 @@
         </div>
         <p class="cam-modal-title">📹 ${escapeHtml(cam.name)}</p>
 
-        <div class="cam-thumb-container" onclick="openCameraPopout('${videoId || ''}', '${escapeHtml(cam.youtube_url)}')" title="Click to open floating live stream player">
+        <div class="cam-thumb-container" onclick="openCameraPopout('${videoId || ''}', '${escapeHtml(cam.youtube_url)}')" title="Tap to watch live stream">
           ${thumbUrl ? `
             <img src="${thumbUrl}" alt="${escapeHtml(cam.name)}" class="cam-thumb-img" />
           ` : `
@@ -444,7 +450,7 @@
                 <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
               </svg>
             </div>
-            <span class="cam-play-text">Open Floating Player</span>
+            <span class="cam-play-text">Watch Live Stream</span>
           </div>
         </div>
 
@@ -470,6 +476,8 @@
     const el = document.createElement('div');
     el.className = 'camera-pin';
     el.title = cam.name;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', 'Live Camera: ' + cam.name);
     el.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#ffffff" viewBox="0 0 16 16">
         <path d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>
@@ -507,18 +515,51 @@
       }, 350);
     }
 
+    // Hover events for desktop mouse
     el.addEventListener('mouseenter', openPopup);
     el.addEventListener('mouseleave', scheduleClose);
 
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
+    function togglePin(e) {
+      if (e) {
+        e.stopPropagation();
+      }
+      clearTimeout(hoverTimer);
       isPinned = !isPinned;
       if (isPinned) {
-        openPopup();
+        if (activePinnedPopup && activePinnedPopup !== popup) {
+          activePinnedPopup.remove();
+        }
+        activePinnedPopup = popup;
+        popup.setHTML(cameraPopupHtml(cam));
+        popup.addTo(map);
       } else {
+        if (activePinnedPopup === popup) activePinnedPopup = null;
         popup.remove();
       }
-    });
+    }
+
+    // Click handler
+    el.addEventListener('click', togglePin);
+
+    // Explicit touch handling for mobile devices to prevent map gesture cancellation
+    let touchStartPos = null;
+    el.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    }, { passive: true });
+
+    el.addEventListener('touchend', (e) => {
+      if (touchStartPos && e.changedTouches && e.changedTouches[0]) {
+        const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.x);
+        const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.y);
+        // Only trigger if user tapped rather than dragging/panning the map
+        if (dx < 10 && dy < 10) {
+          e.preventDefault();
+          togglePin(e);
+        }
+      }
+    }, { passive: false });
 
     popup.on('open', () => {
       const pEl = popup.getElement();
@@ -528,7 +569,10 @@
       }
     });
 
-    popup.on('close', () => { isPinned = false; });
+    popup.on('close', () => {
+      if (activePinnedPopup === popup) activePinnedPopup = null;
+      isPinned = false;
+    });
   }
 
   async function loadCameras() {

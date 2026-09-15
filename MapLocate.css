@@ -354,8 +354,21 @@
     position: relative;
     z-index: 15;
     transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
-  .camera-pin:hover {
+  /* Invisible expanded touch target for mobile fingers (52px diameter) */
+  .camera-pin::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    z-index: 1;
+  }
+  .camera-pin:hover, .camera-pin:active {
     transform: scale(1.15);
   }
   .camera-pin svg {

@@ -387,26 +387,39 @@
 
   // ── LIVE CAMERA MARKERS ──────────────────────────────────────────────────
 
-  function getYouTubeEmbedUrl(rawUrl) {
+  function getYouTubeVideoId(rawUrl) {
     if (!rawUrl) return null;
     const str = String(rawUrl).trim();
-    let videoId = null;
     const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|live|shorts)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = str.match(regExp);
-    if (match && match[1]) {
-      videoId = match[1];
-    } else if (/^[a-zA-Z0-9_-]{11}$/.test(str)) {
-      videoId = str;
-    }
-    return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1` : null;
+    if (match && match[1]) return match[1];
+    if (/^[a-zA-Z0-9_-]{11}$/.test(str)) return str;
+    return null;
   }
+
+  window.openCameraPopout = function(videoId, rawUrl) {
+    const w = 640;
+    const h = 390;
+    const left = Math.max(0, Math.round((window.screen.width - w) / 2));
+    const top = Math.max(0, Math.round((window.screen.height - h) / 2));
+    // Opening embed URL directly in a standalone window bypasses iframe embedding restrictions!
+    const targetUrl = videoId
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1`
+      : rawUrl;
+    window.open(
+      targetUrl,
+      'LiveCam_' + (videoId || 'stream'),
+      `width=${w},height=${h},top=${top},left=${left},status=no,menubar=no,toolbar=no,location=no,resizable=yes,scrollbars=no`
+    );
+  };
 
   function cameraPopupHtml(cam) {
     const coords = `${cam.lat.toFixed(4)}°N, ${cam.lng.toFixed(4)}°E`;
     const desc = cam.description
       ? `<p class="cam-modal-desc">${escapeHtml(cam.description)}</p>`
       : '';
-    const embedUrl = getYouTubeEmbedUrl(cam.youtube_url);
+    const videoId = getYouTubeVideoId(cam.youtube_url);
+    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
 
     return `
       <div class="cam-modal-wrap">
@@ -419,27 +432,33 @@
         </div>
         <p class="cam-modal-title">📹 ${escapeHtml(cam.name)}</p>
 
-        <div class="cam-video-container">
-          ${embedUrl ? `
-            <iframe
-              src="${embedUrl}"
-              title="${escapeHtml(cam.name)}"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              loading="eager"
-            ></iframe>
+        <div class="cam-thumb-container" onclick="openCameraPopout('${videoId || ''}', '${escapeHtml(cam.youtube_url)}')" title="Click to open floating live stream player">
+          ${thumbUrl ? `
+            <img src="${thumbUrl}" alt="${escapeHtml(cam.name)}" class="cam-thumb-img" />
           ` : `
-            <div class="cam-video-fallback">
-              <p>Unable to load video stream</p>
-              <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
-            </div>
+            <div class="cam-thumb-placeholder">📹 Live Camera Feed</div>
           `}
+          <div class="cam-thumb-overlay">
+            <div class="cam-play-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fff" viewBox="0 0 16 16">
+                <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+              </svg>
+            </div>
+            <span class="cam-play-text">Open Floating Player</span>
+          </div>
         </div>
 
         ${desc}
+        <button type="button" class="cam-popout-btn" onclick="openCameraPopout('${videoId || ''}', '${escapeHtml(cam.youtube_url)}')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+          </svg>
+          Watch Live Stream
+        </button>
+
         <div class="cam-modal-footer">
           <span class="pop-coords-inline" style="margin:0;">${coords}</span>
-          <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer" class="cam-ext-link" title="Open directly in YouTube">
+          <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer" class="cam-ext-link" title="Open directly on YouTube">
             YouTube ↗
           </a>
         </div>

@@ -398,18 +398,18 @@
   }
 
   window.openCameraPopout = function(videoId, rawUrl) {
-    const w = 640;
-    const h = 390;
+    const w = 840;
+    const h = 520;
     const left = Math.max(0, Math.round((window.screen.width - w) / 2));
     const top = Math.max(0, Math.round((window.screen.height - h) / 2));
-    // Opening embed URL directly in a standalone window bypasses iframe embedding restrictions!
+    // Use the direct watch URL so YouTube doesn't trigger embed restrictions
     const targetUrl = videoId
-      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1`
+      ? `https://www.youtube.com/watch?v=${videoId}`
       : rawUrl;
     window.open(
       targetUrl,
       'LiveCam_' + (videoId || 'stream'),
-      `width=${w},height=${h},top=${top},left=${left},status=no,menubar=no,toolbar=no,location=no,resizable=yes,scrollbars=no`
+      `width=${w},height=${h},top=${top},left=${left},status=no,menubar=no,toolbar=no,location=no,resizable=yes`
     );
   };
 

@@ -387,27 +387,62 @@
 
   // ── LIVE CAMERA MARKERS ──────────────────────────────────────────────────
 
+  function getYouTubeEmbedUrl(rawUrl) {
+    if (!rawUrl) return null;
+    const str = String(rawUrl).trim();
+    let videoId = null;
+    const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|live|shorts)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = str.match(regExp);
+    if (match && match[1]) {
+      videoId = match[1];
+    } else if (/^[a-zA-Z0-9_-]{11}$/.test(str)) {
+      videoId = str;
+    }
+    return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1` : null;
+  }
+
   function cameraPopupHtml(cam) {
     const coords = `${cam.lat.toFixed(4)}°N, ${cam.lng.toFixed(4)}°E`;
     const desc = cam.description
-      ? `<p class="cam-pop-desc">${escapeHtml(cam.description)}</p>`
+      ? `<p class="cam-modal-desc">${escapeHtml(cam.description)}</p>`
       : '';
+    const embedUrl = getYouTubeEmbedUrl(cam.youtube_url);
+
     return `
-      <div class="cam-pop-wrap">
-        <button type="button" class="pop-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">✕</button>
-        <div class="cam-pop-header">
-          <span class="cam-live-dot"></span>
-          <span class="cam-live-label">Live</span>
+      <div class="cam-modal-wrap">
+        <div class="cam-modal-header">
+          <div class="cam-live-indicator">
+            <span class="cam-live-dot"></span>
+            <span class="cam-live-label">LIVE FEED</span>
+          </div>
+          <button type="button" class="cam-modal-close" onclick="this.closest('.maplibregl-popup').remove()" title="Close">✕</button>
         </div>
-        <p class="cam-pop-title">📷 ${escapeHtml(cam.name)}</p>
+        <p class="cam-modal-title">📹 ${escapeHtml(cam.name)}</p>
+
+        <div class="cam-video-container">
+          ${embedUrl ? `
+            <iframe
+              src="${embedUrl}"
+              title="${escapeHtml(cam.name)}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="eager"
+            ></iframe>
+          ` : `
+            <div class="cam-video-fallback">
+              <p>Unable to load video stream</p>
+              <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a>
+            </div>
+          `}
+        </div>
+
         ${desc}
-        <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer" class="cam-watch-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408z"/>
-          </svg>
-          Watch on YouTube
-        </a>
-        <p class="pop-coords">${coords}</p>
+        <div class="cam-modal-footer">
+          <span class="pop-coords-inline" style="margin:0;">${coords}</span>
+          <a href="${escapeHtml(cam.youtube_url)}" target="_blank" rel="noopener noreferrer" class="cam-ext-link" title="Open directly in YouTube">
+            YouTube ↗
+          </a>
+        </div>
       </div>
     `;
   }
@@ -416,10 +451,20 @@
     const el = document.createElement('div');
     el.className = 'camera-pin';
     el.title = cam.name;
+    el.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#ffffff" viewBox="0 0 16 16">
+        <path d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>
+      </svg>
+      <span class="cam-badge-live">LIVE</span>
+    `;
 
-    const popup = new maplibregl.Popup({ offset: 18, closeButton: false })
-      .setLngLat([cam.lng, cam.lat])
-      .setHTML(cameraPopupHtml(cam));
+    const popup = new maplibregl.Popup({
+      className: 'cam-video-popup',
+      maxWidth: '380px',
+      offset: 22,
+      closeButton: false
+    })
+      .setLngLat([cam.lng, cam.lat]);
 
     new maplibregl.Marker({ element: el })
       .setLngLat([cam.lng, cam.lat])
@@ -430,14 +475,17 @@
 
     function openPopup() {
       clearTimeout(hoverTimer);
-      if (!popup.isOpen()) popup.addTo(map);
+      if (!popup.isOpen()) {
+        popup.setHTML(cameraPopupHtml(cam));
+        popup.addTo(map);
+      }
     }
 
     function scheduleClose() {
       clearTimeout(hoverTimer);
       hoverTimer = setTimeout(() => {
         if (!isPinned && popup.isOpen()) popup.remove();
-      }, 250);
+      }, 350);
     }
 
     el.addEventListener('mouseenter', openPopup);

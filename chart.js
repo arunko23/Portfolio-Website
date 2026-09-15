@@ -315,16 +315,15 @@ function renderPlotOnCanvas(ctx, p, showLabels) {
   drawText(ctx, String(nr), CHART.left - 10, by - 4, BLUE, 20, 'right');
   drawText(ctx, String(tq) + '%', bx + 8, CHART.botBottom + 16, RED, 18, 'left');
   drawText(ctx, pa.toLocaleString() + ' ft', CHART.left - 10, my, BLUE, 20, 'right');
-  drawText(ctx, String(ng) + '%', gx + 14, oy - 20, BLUE, 20, 'left');
+  drawText(ctx, String(ng), gx + 14, oy - 20, BLUE, 20, 'left');
   drawText(ctx, (oat >= 0 ? '+' : '') + String(oat) + '°C', CHART.left - 10, oy, BLUE, 20, 'right');
-  drawText(ctx, cls, CHART.right - 8, fy - 12, good ? GREEN : RED, 15, 'right');
 
   // ── Draw conditions in the CONDITIONS box (bottom-left of chart) ──
   const condItems = [
     { label: 'NR',  value: `${nr} RPM` },
     { label: 'TQ',  value: `${tq}%` },
     { label: 'PA',  value: `${pa.toLocaleString()} ft` },
-    { label: 'NG',  value: `${ng.toFixed(1)}%` },
+    { label: 'NG',  value: `${ng.toFixed(1)}` },
     { label: 'OAT', value: `${oat >= 0 ? '+' : ''}${oat}°C` },
   ];
   const dashY = [706, 718, 729, 739, 750];
@@ -398,8 +397,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const ngNote = p.ng !== p.ngLo && p.ng !== p.ngHi
-      ? `NG ${p.ng}% is interpolated between ${p.ngLo}% and ${p.ngHi}% curves`
-      : `NG ${p.ng}% is locked to the printed ${p.ng}% curve`;
+      ? `NG ${p.ng} is interpolated between ${p.ngLo} and ${p.ngHi} curves`
+      : `NG ${p.ng} is locked to the printed ${p.ng} curve`;
 
     statusDetails.innerHTML = `
       Result: <strong>${p.cls}</strong><br>

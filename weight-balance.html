@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AS350 B3e Weight &amp; Balance Chart Plotter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="weight-balance.css" />
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <p class="eyebrow">Eurocopter / Airbus AS350 B3e</p>
+    <h1>Weight &amp; Balance Plotter <span class="chart-subtitle">Figure 1/3 (Page 9)</span></h1>
+  </div>
+  <div class="header-actions">
+    <a href="chart.html" class="header-btn" title="Back to Reference Graphs">← Reference Graphs</a>
+  </div>
+</header>
+
+<main class="main-layout">
+  <!-- Controls Sidebar -->
+  <aside class="sidebar">
+    <!-- Status / Result Card -->
+    <div class="card result-card status-none" id="statusCard">
+      <div class="status-header">
+        <span class="status-indicator" id="statusIndicator">●</span>
+        <span class="status-title" id="statusTitle">No Point Plotted</span>
+      </div>
+      <p class="status-desc" id="statusDesc">Enter aircraft weight and CG to plot on Figure 1/3 and verify ballast requirements.</p>
+      <div class="status-details" id="statusDetails"></div>
+    </div>
+
+    <!-- Parameter Form -->
+    <div class="card params-card">
+      <h2 class="card-title">Flight Parameters</h2>
+
+      <form id="plotForm">
+        <div class="field-group">
+          <label for="inputWeight">Aircraft Gross Weight</label>
+          <div class="input-row">
+            <input type="number" id="inputWeight" step="0.1" value="1200" min="1000" max="1600" required />
+            <select id="weightUnit" class="input-select" aria-label="Weight Unit">
+              <option value="kg" selected>kg</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="inputCg">Center of Gravity (CG / Balance)</label>
+          <div class="input-row">
+            <input type="number" id="inputCg" step="0.1" value="3500" min="3300" max="3650" required />
+            <select id="cgUnit" class="input-select" aria-label="CG Unit">
+              <option value="mm" selected>mm</option>
+              <option value="in">in</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-error" id="formError" style="display:none;"></div>
+
+        <div class="btn-grid">
+          <button type="submit" class="btn btn-primary btn-col-2" id="btnPlot">📍 Plot Point</button>
+          <button type="button" class="btn btn-secondary" id="btnClearLast">↺ Clear Last</button>
+          <button type="button" class="btn btn-danger" id="btnClearAll">✕ Clear All</button>
+          <button type="button" class="btn btn-secondary" id="btnExport">📥 Export CSV</button>
+          <button type="button" class="btn btn-secondary" id="btnPrint">🖨️ Print Chart</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Display & Inspector Toggles -->
+    <div class="card actions-card">
+      <h2 class="card-title">Overlay Options</h2>
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <input type="checkbox" id="chkConnect" checked />
+          <span>Connect plotted points</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chkCgLine" checked />
+          <span>Show CG construction lines</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chkCrosshair" />
+          <span>Show coordinate crosshairs</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chkReadMode" />
+          <span>Interactive graph inspector (hover / click)</span>
+        </label>
+      </div>
+
+      <div class="coords-readout" id="coordsReadout" style="display:none;">
+        <div style="font-weight:600; margin-bottom:2px; color:var(--navy);">Graph Coordinates:</div>
+        <div id="readoutText">Hover over chart or click to inspect point</div>
+      </div>
+
+      <div class="ref-notice">
+        <strong>Reference Note:</strong> The chart graph represents AMM Figure 1/3 from page 9. CG lines follow printed millimeter markers with varying slopes rather than a single linear approximation.
+      </div>
+    </div>
+  </aside>
+
+  <!-- Plot Canvas Stage -->
+  <section class="stage-section">
+    <div class="stage-header">
+      <span class="stage-tag">AS350 B3e · Figure 1/3 Weight &amp; Balance Graph</span>
+      <div class="zoom-controls">
+        <button type="button" class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+        <span class="zoom-level" id="zoomLevel">100%</span>
+        <button type="button" class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+        <button type="button" class="zoom-btn zoom-fit" id="zoomReset" title="Fit to Viewport">Fit</button>
+      </div>
+    </div>
+
+    <div class="stage-note">
+      💡 <strong>Plotting Construction:</strong> CG follows its printed line from the bottom scale to the plotted point; from the intersection point it continues up-right parallel to the left-side grid lines (annotations ①②). The horizontal weight line continues rightward across the chart.
+    </div>
+
+    <div class="canvas-viewport" id="viewport">
+      <div class="plot-stage" id="plotStage">
+        <img src="as350-figure-1-3.png" alt="AS350 B3e AMM Figure 1/3 weight and balance graph" id="chartImg" width="1150" height="910" draggable="false" />
+        <canvas id="plotCanvas" width="1150" height="910"></canvas>
+      </div>
+    </div>
+
+    <!-- Plotted Points Table -->
+    <div class="points-table-wrap">
+      <div class="points-table-header">
+        <h3 class="points-table-title">Plotted Flight Points <span class="points-count" id="pointsCount">(0 points)</span></h3>
+      </div>
+      <div class="empty-table-msg" id="emptyTableMsg">No flight points plotted yet. Enter weight and CG in the sidebar and click "Plot Point".</div>
+      <table class="points-table" id="pointsTable">
+        <thead>
+          <tr>
+            <th>Point</th>
+            <th>Weight (kg)</th>
+            <th>Weight (lb)</th>
+            <th>CG (mm)</th>
+            <th>CG (in)</th>
+            <th>Flight Zone</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="pointsTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="weight-balance.js"></script>
+</body>
+</html>

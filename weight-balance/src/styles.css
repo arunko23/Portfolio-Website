@@ -1,0 +1,127 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-bg: #10161c;
+  --color-surface: #182028;
+  --color-surface-2: #1e2832;
+  --color-fg: #e7ecef;
+  --color-muted: #8b98a4;
+  --color-subtle: #5c6b76;
+  --color-border: #2c3944;
+  --color-ink: #9eb0c0;
+  --color-primary: #d7dde2;
+  --color-primary-foreground: #10161c;
+  --color-ring: #d7dde2;
+  --color-good: #3d9a6a;
+  --color-warn: #c4a35a;
+  --color-bad: #c45c5c;
+  --color-plot: #c44536;
+  --color-plot-halo: #ffffff;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-fast: 250ms;
+  --motion-quick: 150ms;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html,
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: none;
+  }
+}
+
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+    color-scheme: light !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+  }
+
+  header,
+  footer,
+  aside,
+  .no-print {
+    display: none !important;
+  }
+
+  body.is-printing .app-screen {
+    display: none !important;
+  }
+
+  body.is-printing {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  body.is-printing .print-sheet {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  body.is-printing .print-sheet img {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+  }
+}

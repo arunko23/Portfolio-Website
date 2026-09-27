@@ -6,17 +6,19 @@
         type: 'raster',
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
         tileSize: 256,
+        maxzoom: 18,
         attribution: 'Tiles &copy; Esri'
       },
       'esri-labels': {
         type: 'raster',
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
-        tileSize: 256
+        tileSize: 256,
+        maxzoom: 18
       }
     },
     layers: [
-      { id: 'esri-satellite-layer', type: 'raster', source: 'esri-satellite', minzoom: 0, maxzoom: 19 },
-      { id: 'esri-labels-layer', type: 'raster', source: 'esri-labels', minzoom: 0, maxzoom: 19 }
+      { id: 'esri-satellite-layer', type: 'raster', source: 'esri-satellite', minzoom: 0, maxzoom: 22 },
+      { id: 'esri-labels-layer', type: 'raster', source: 'esri-labels', minzoom: 0, maxzoom: 22 }
     ]
   };
 
@@ -27,11 +29,12 @@
         type: 'raster',
         tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
         tileSize: 256,
+        maxzoom: 19,
         attribution: '&copy; OpenStreetMap contributors'
       }
     },
     layers: [
-      { id: 'osm-street-layer', type: 'raster', source: 'osm-street', minzoom: 0, maxzoom: 19 }
+      { id: 'osm-street-layer', type: 'raster', source: 'osm-street', minzoom: 0, maxzoom: 22 }
     ]
   };
 
@@ -41,6 +44,7 @@
     style: satelliteStyle,
     center: [85.4298, 27.6710], // [lng, lat]
     zoom: 12,
+    maxZoom: 19,
     pitch: 0, // 0deg = 2D view
     bearing: 0 // 0deg = North
   });

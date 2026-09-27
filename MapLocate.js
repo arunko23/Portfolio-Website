@@ -479,21 +479,23 @@
     el.setAttribute('role', 'button');
     el.setAttribute('aria-label', 'Live Camera: ' + cam.name);
     el.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#ffffff" viewBox="0 0 16 16">
-        <path d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>
-      </svg>
-      <span class="cam-badge-live">LIVE</span>
+      <div class="camera-pin-inner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#ffffff" viewBox="0 0 16 16">
+          <path d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>
+        </svg>
+        <span class="cam-badge-live">LIVE</span>
+      </div>
     `;
 
     const popup = new maplibregl.Popup({
       className: 'cam-video-popup',
       maxWidth: '380px',
-      offset: 22,
+      offset: 18,
       closeButton: false
     })
       .setLngLat([cam.lng, cam.lat]);
 
-    new maplibregl.Marker({ element: el })
+    new maplibregl.Marker({ element: el, anchor: 'center' })
       .setLngLat([cam.lng, cam.lat])
       .addTo(map);
 
@@ -575,6 +577,21 @@
     });
   }
 
+  // Adjust camera marker sizing dynamically based on map zoom level so it scales gracefully
+  // and stays anchored to its designated position without dominating or drifting on zoom out
+  function updateCameraMarkersScale() {
+    const zoom = map.getZoom();
+    // At zoom >= 13 (close/sector view), full scale 1.0 (28px).
+    // At zoom <= 5 (country/world overview), scales down to 0.55 (~15px).
+    const scale = Math.max(0.55, Math.min(1.0, 0.55 + (zoom - 5) * (0.45 / 8)));
+    const showBadge = zoom >= 9;
+    document.querySelectorAll('.camera-pin-inner').forEach(pin => {
+      pin.style.setProperty('--cam-zoom-scale', scale.toFixed(3));
+      pin.classList.toggle('hide-live-badge', !showBadge);
+    });
+  }
+  map.on('zoom', updateCameraMarkersScale);
+
   async function loadCameras() {
     try {
       const res = await fetch('/cameras');
@@ -583,6 +600,7 @@
       for (const cam of cameras) {
         addCameraMarker(cam);
       }
+      updateCameraMarkersScale();
     } catch (e) {
       console.error('Failed to load live cameras:', e);
     }

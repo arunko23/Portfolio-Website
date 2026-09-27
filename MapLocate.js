@@ -474,7 +474,7 @@
 
   function addCameraMarker(cam) {
     const el = document.createElement('div');
-    el.className = 'camera-pin';
+    el.className = 'maplibregl-marker camera-pin';
     el.title = cam.name;
     el.setAttribute('role', 'button');
     el.setAttribute('aria-label', 'Live Camera: ' + cam.name);

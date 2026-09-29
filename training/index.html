@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KHS Training Document Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --navy: #1a2744;
+    --red: #c0392b;
+    --light: #f4f6fa;
+    --white: #ffffff;
+    --border: #d0d6e4;
+    --text: #2c3e50;
+    --muted: #6b7a99;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .app-header {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f6b 100%);
+    color: white; padding: 22px 48px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    box-shadow: 0 4px 24px rgba(26,39,68,0.25);
+  }
+  .app-header-left {
+    display: flex; align-items: center; gap: 20px;
+  }
+  .app-header .logo-circle {
+    width: 48px; height: 48px; background: var(--red);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 19px; font-weight: 700; flex-shrink: 0; font-family: 'Crimson Pro', serif;
+  }
+  .app-header h1 { font-family: 'Crimson Pro', serif; font-size: 1.6rem; font-weight: 700; }
+  .app-header p { font-size: 0.92rem; opacity: 0.7; margin-top: 2px; }
+  .app-header .nav-back {
+    color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem;
+    font-weight: 500; padding: 7px 16px; border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px; transition: all 0.2s; white-space: nowrap;
+  }
+  .app-header .nav-back:hover {
+    color: #fff; border-color: #fff; background: rgba(255,255,255,0.1);
+  }
+
+  .container { max-width: 860px; margin: 32px auto; padding: 0 24px 60px; }
+
+  .section-card {
+    background: var(--white); border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 24px;
+    overflow: hidden; box-shadow: 0 2px 10px rgba(26,39,68,0.06);
+  }
+  .section-header {
+    background: var(--navy); color: white;
+    padding: 12px 22px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-badge {
+    background: var(--red); color: white; font-size: 0.78rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .section-header h2 { font-family: 'Crimson Pro', serif; font-size: 1.15rem; font-weight: 600; }
+  .section-body { padding: 22px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+
+  label { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+  label span.req { color: var(--red); margin-left: 2px; }
+
+  input[type="text"], input[type="date"], input[type="number"] {
+    border: 1.5px solid var(--border); border-radius: 6px; padding: 9px 13px;
+    font-family: 'DM Sans', sans-serif; font-size: 1.0rem; color: var(--text);
+    background: #fafbfd; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  }
+  input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(26,39,68,0.08); background: white; }
+
+  .participants-table { width: 100%; border-collapse: collapse; font-size: 0.96rem; }
+  .participants-table th {
+    background: #eef1f8; padding: 9px 12px; text-align: left; font-weight: 600;
+    color: var(--navy); border: 1px solid var(--border); font-size: 0.88rem; letter-spacing: 0.04em;
+  }
+  .participants-table td { border: 1px solid var(--border); padding: 5px 7px; }
+  .participants-table td input {
+    border: none; background: transparent; width: 100%; padding: 4px 6px;
+    font-size: 0.96rem; outline: none; font-family: 'DM Sans', sans-serif;
+  }
+  .participants-table td input:focus { background: #f0f4ff; border-radius: 3px; }
+  .add-row-btn {
+    margin-top: 9px; background: none; border: 1.5px dashed var(--navy);
+    color: var(--navy); padding: 6px 16px; border-radius: 5px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; transition: background 0.15s;
+  }
+  .add-row-btn:hover { background: var(--light); }
+
+  .generate-section { text-align: center; margin-top: 8px; }
+  .btn-generate {
+    background: linear-gradient(135deg, var(--red), #e74c3c); color: white; border: none;
+    padding: 15px 48px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 1.07rem; font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
+    box-shadow: 0 4px 16px rgba(192,57,43,0.35); transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(192,57,43,0.45); }
+  .btn-download {
+    background: linear-gradient(135deg, var(--navy), #2d3f6b); color: white; border: none;
+    padding: 13px 36px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 1.0rem; font-weight: 600; cursor: pointer; margin-left: 12px;
+    box-shadow: 0 4px 16px rgba(26,39,68,0.22); transition: transform 0.15s; display: none;
+  }
+  .btn-download:hover { transform: translateY(-2px); }
+  .btn-print {
+    background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; border: none;
+    padding: 13px 36px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 1.0rem; font-weight: 600; cursor: pointer; margin-left: 12px;
+    box-shadow: 0 4px 16px rgba(39,174,96,0.25); transition: transform 0.15s; display: none;
+  }
+  .btn-print:hover { transform: translateY(-2px); }
+
+  #preview-area { margin-top: 36px; display: none; }
+  .preview-label {
+    font-family: 'Crimson Pro', serif; font-size: 1.4rem; font-weight: 700;
+    color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .preview-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ══ TRUE A4 PAGE: 794px × 1123px at 96dpi, 15mm margins ══ */
+  .a4-page {
+    width: 794px;
+    min-height: 1123px;
+    background: #fff;
+    margin: 0 auto 28px auto;
+    padding: 56px 57px 48px 57px;
+    box-shadow: 0 4px 24px rgba(26,39,68,0.13);
+    border: 1px solid #dde2ec;
+    border-radius: 3px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.45;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Shared doc elements ── */
+  .doc-logo-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .doc-form-no { font-size: 10pt; text-align: right; line-height: 1.55; }
+  .doc-title { text-align: center; font-weight: 700; font-size: 13pt; margin: 8px 0 12px; }
+  .doc-meta { margin-bottom: 5px; font-size: 11pt; }
+  .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11pt; }
+  .doc-table th, .doc-table td { border: 1px solid #000; padding: 5px 8px; }
+  .doc-table th { font-weight: 700; background: #f0f0f0; }
+  .doc-footer { font-size: 9.5pt; color: #555; }
+  .doc-trainer { font-size: 11pt; }
+  .doc-spacer { flex: 1; min-height: 12px; }
+
+  .doc-feedback-outer { border: 1px solid #000; margin-bottom: 10px; }
+  .doc-feedback-header { display: grid; grid-template-columns: 1fr 1fr; }
+  .doc-feedback-cell { padding: 5px 8px; border-right: 1px solid #000; border-bottom: 1px solid #000; font-size: 10.5pt; }
+  .doc-feedback-cell:nth-child(even) { border-right: none; }
+  .doc-feedback-cell.full { grid-column: span 2; border-right: none; border-bottom: none; }
+
+  .feedback-rating-table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  .feedback-rating-table th, .feedback-rating-table td { border: 1px solid #000; padding: 5px 7px; text-align: center; }
+  .feedback-rating-table td:first-child { text-align: left; }
+
+  @media print {
+    body { background: white; }
+    .app-header, .container > .section-card, .generate-section, .preview-label { display: none !important; }
+    #preview-area { display: block !important; margin: 0; }
+    .a4-page { width: 210mm; min-height: 297mm; padding: 15mm; margin: 0; box-shadow: none; border: none; page-break-after: always; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-header-left">
+    <div class="logo-circle">KHS</div>
+    <div>
+      <h1>Training Document Generator</h1>
+      <p>Kailash Helicopter Services — Fill once, generate documents automatically</p>
+    </div>
+  </div>
+  <a href="../index.html" class="nav-back">← Portfolio</a>
+</div>
+
+<div class="container">
+
+  <div class="section-card">
+    <div class="section-header">
+      <span class="section-badge">Step 1</span>
+      <h2>Common Training Information</h2>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>Ref / Training Detail <span class="req">*</span></label>
+          <input type="text" id="ref" placeholder="e.g. KHS-T-26-13">
+        </div>
+        <div class="field">
+          <label>Training Description <span class="req">*</span></label>
+          <input type="text" id="description" placeholder="e.g. Differential between AS 350 B3e to AS 350 B2">
+        </div>
+        <div class="field">
+          <label>Training Date <span class="req">*</span></label>
+          <input type="date" id="training_date">
+        </div>
+        <div class="field">
+          <label>No. of Days <span class="req">*</span></label>
+          <input type="number" id="no_of_days" placeholder="1" min="1" value="1">
+        </div>
+        <div class="field">
+          <label>Facility / Training Location <span class="req">*</span></label>
+          <input type="text" id="facility" placeholder="e.g. TIA, Head Office">
+        </div>
+        <div class="field">
+          <label>Trainer / Instructor <span class="req">*</span></label>
+          <input type="text" id="trainer" placeholder="e.g. Anirudra Shrestha">
+        </div>
+        <div class="field">
+          <label>Signatory Name (Training Notice) <span class="req">*</span></label>
+          <input type="text" id="signatory" placeholder="e.g. Manish Jung Joshi">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header">
+      <span class="section-badge">Step 2</span>
+      <h2>Participant List</h2>
+    </div>
+    <div class="section-body">
+      <table class="participants-table">
+        <thead>
+          <tr>
+            <th style="width:40px">No.</th>
+            <th>Full Name</th>
+            <th>Department</th>
+          </tr>
+        </thead>
+        <tbody id="participants-body">
+          <tr><td style="text-align:center;color:#888;font-size:0.88rem;">1</td><td><input type="text" placeholder="Full Name"></td><td><input type="text" placeholder="Department"></td></tr>
+          <tr><td style="text-align:center;color:#888;font-size:0.88rem;">2</td><td><input type="text" placeholder="Full Name"></td><td><input type="text" placeholder="Department"></td></tr>
+          <tr><td style="text-align:center;color:#888;font-size:0.88rem;">3</td><td><input type="text" placeholder="Full Name"></td><td><input type="text" placeholder="Department"></td></tr>
+        </tbody>
+      </table>
+      <button class="add-row-btn" onclick="addParticipantRow()">+ Add Participant</button>
+    </div>
+  </div>
+
+  <div class="generate-section">
+    <button class="btn-generate" onclick="generateDocs()">⚡ Generate Documents</button>
+    <button class="btn-download" id="btn-download" onclick="downloadHTML()">⬇ Download HTML File</button>
+    <button class="btn-print" id="btn-print" onclick="window.print()">🖨 Print / PDF</button>
+  </div>
+
+  <div id="preview-area">
+    <div class="preview-label">Preview — Generated Documents</div>
+    <div id="docs-output"></div>
+  </div>
+
+</div>
+
+<script>
+let participantCount = 3;
+
+function addParticipantRow() {
+  participantCount++;
+  const tbody = document.getElementById('participants-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td style="text-align:center;color:#888;font-size:0.88rem;">${participantCount}</td><td><input type="text" placeholder="Full Name"></td><td><input type="text" placeholder="Department"></td>`;
+  tbody.appendChild(tr);
+}
+
+function getParticipants() {
+  const rows = document.querySelectorAll('#participants-body tr');
+  const out = [];
+  rows.forEach((row, i) => {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value.trim();
+    const dept = inputs[1].value.trim();
+    if (name || dept) out.push({ no: i + 1, name, dept });
+  });
+  return out;
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+
+function formatDateShort(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+}
+
+const LOGO_URL = "https://image2url.com/r2/default/images/1775719664452-086aca2b-6f73-4472-ae64-d9037c349b3c.jpg";
+
+function khsLogo(height) {
+  const h = height || 58;
+  return `<img src="${LOGO_URL}" alt="Kailash Helicopter Services"
+    style="height:${h}px;width:auto;object-fit:contain;display:block;margin:0 auto;"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+  <div style="display:none;font-family:'Times New Roman',serif;line-height:1.3;text-align:center;">
+    <span style="font-size:14pt;font-weight:700;color:#1a2744;">Kailash</span><br>
+    <span style="font-size:10.5pt;font-weight:700;color:#c0392b;">Helicopter Services</span><br>
+    <span style="font-size:8pt;font-style:italic;color:#555;">"The Spirit of Nepal"</span>
+  </div>`;
+}
+
+function generateDocs() {
+  const ref         = document.getElementById('ref').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const training_date = document.getElementById('training_date').value;
+  const no_of_days  = document.getElementById('no_of_days').value;
+  const facility    = document.getElementById('facility').value.trim();
+  const trainer     = document.getElementById('trainer').value.trim();
+  const signatory   = document.getElementById('signatory').value.trim();
+  const participants = getParticipants();
+
+  const dateFmt   = formatDate(training_date);
+  const dateShort = formatDateShort(training_date);
+
+  // Attendance: accommodate all participants, minimum 10 rows
+  let attendanceRows = '';
+  const maxAttendanceRows = Math.max(participants.length, 10);
+  for (let i = 1; i <= maxAttendanceRows; i++) {
+    const p = participants[i - 1];
+    attendanceRows += `<tr>
+      <td style="text-align:center;">${i}.</td>
+      <td style="height:22px;">${p ? p.name : ''}</td>
+      <td></td>
+    </tr>`;
+  }
+
+  // Notice participant rows (at least 5)
+  let noticeRows = '';
+  const maxRows = Math.max(participants.length, 5);
+  for (let i = 0; i < maxRows; i++) {
+    const p = participants[i];
+    noticeRows += `<tr>
+      <td style="padding:5px 8px;border:1px solid #000;font-size:10.5pt;height:22px;">${p ? p.name : ''}</td>
+      <td style="padding:5px 8px;border:1px solid #000;font-size:10.5pt;">${p ? p.dept : ''}</td>
+    </tr>`;
+  }
+
+  // Generate a Feedback Form for each participant (minimum 1 if none entered yet)
+  let feedbackFormsHtml = '';
+  const numFeedbackForms = participants.length > 0 ? participants.length : 1; 
+
+  for (let i = 0; i < numFeedbackForms; i++) {
+    feedbackFormsHtml += `
+<div class="a4-page">
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:10px;">
+    <tr>
+      <td style="padding:7px 10px;width:120px;border-right:1px solid #000;vertical-align:middle;">${khsLogo(54)}</td>
+      <td style="padding:7px 10px;font-weight:700;font-size:12.5pt;text-align:center;vertical-align:middle;">KHS TRAINING FEEDBACK FORM</td>
+      <td style="padding:7px 10px;width:105px;border-left:1px solid #000;font-size:9pt;text-align:right;vertical-align:top;line-height:1.5;">
+        Form No. KHS/T/007<br><span style="text-decoration:underline;">Amdt.</span> 01, Nov 2024
+      </td>
+    </tr>
+  </table>
+
+  <div class="doc-feedback-outer">
+    <div class="doc-feedback-header">
+      <div class="doc-feedback-cell"><strong>Course Title:</strong> ${description}</div>
+      <div class="doc-feedback-cell"><strong>Training Date:</strong> ${dateFmt}</div>
+      <div class="doc-feedback-cell"><strong>Instructor:</strong> ${trainer}</div>
+      <div class="doc-feedback-cell"><strong>Training Duration / Days:</strong> ${no_of_days}</div>
+      <div class="doc-feedback-cell full"><strong>Training Location:</strong> ${facility}</div>
+    </div>
+  </div>
+
+  <p style="font-size:10pt;font-style:italic;margin:6px 0 10px;">
+    Rate the content of the lecture: Tick for your response.
+    (A = Above expectation, B = Meets Expectation, C = Satisfactory, D = Unsatisfactory.)
+  </p>
+
+  <table class="feedback-rating-table">
+    <thead>
+      <tr>
+        <th style="text-align:left; font-weight:700; width:52%;">Facility</th>
+        <th style="width:6%; font-weight:700;">A</th>
+        <th style="width:6%; font-weight:700;">B</th>
+        <th style="width:6%; font-weight:700;">C</th>
+        <th style="width:6%; font-weight:700;">D</th>
+        <th style="text-align:left; font-weight:700;">Comments (if any)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Classroom Facility</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td><strong>Course Matters</strong></td>
+        <td><strong>A</strong></td>
+        <td><strong>B</strong></td>
+        <td><strong>C</strong></td>
+        <td><strong>D</strong></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Relevance of course with job function</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td>Up-to-date material</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td>Course duration</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td><strong>Instructors/s</strong></td>
+        <td><strong>A</strong></td>
+        <td><strong>B</strong></td>
+        <td><strong>C</strong></td>
+        <td><strong>D</strong></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Communication skills</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td>Clarity of presentation</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td>Response to questions</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:11pt; margin-top:24px; margin-bottom:65px;">Please write your comments/Suggestions to improve the lecture:</p>
+
+  <p style="font-size:11pt; line-height:1.6;">
+    Trainee Name: .............................................................<br>
+    (Voluntary)
+  </p>
+  <div class="doc-spacer"></div>
+  <div class="doc-footer">This form is a part of Training Manual Ref: KHS-ETPM-01</div>
+</div>
+`;
+  }
+
+  const html = `
+<div class="a4-page">
+  <div class="doc-logo-row">
+    <div>${khsLogo(60)}</div>
+    <div class="doc-form-no">Form No. KHS/T/002<br><span style="text-decoration:underline;">Amdt.</span> 0 August 2022</div>
+  </div>
+
+  <div class="doc-title">Training Attendance Sheet</div>
+
+  <div class="doc-meta"><strong>Training Detail</strong>&emsp;${ref}</div>
+  <div class="doc-meta"><strong>Training Description</strong>&emsp;<strong>${description}</strong></div>
+  <div class="doc-meta"><strong>Facility</strong>&emsp;${facility}</div>
+  <div class="doc-meta"><strong>Date</strong>&emsp;${dateFmt}</div>
+
+  <table class="doc-table">
+    <thead>
+      <tr>
+        <th style="width:38px;">No.</th>
+        <th>Name of Participants</th>
+        <th style="width:130px;">Signature</th>
+      </tr>
+    </thead>
+    <tbody>${attendanceRows}</tbody>
+  </table>
+
+  <div class="doc-trainer" style="margin-top:24px;">
+    <p><strong>Trainer:</strong>&nbsp; ${trainer}</p>
+    <p style="margin-top:10px;"><strong>Date/Signature:</strong></p>
+  </div>
+
+  <div class="doc-spacer"></div>
+  <div class="doc-footer">This form is a part of Training Manual Ref: KHS-ETPM-01</div>
+</div>
+
+<div class="a4-page">
+  <div class="doc-logo-row">
+    <div>${khsLogo(60)}</div>
+    <div class="doc-form-no">Form No. KHS/T/007<br><span style="text-decoration:underline;">Amdt.</span> 0 August 2022</div>
+  </div>
+
+  <p style="font-size:11pt;margin-bottom:10px;"><strong>Ref. ${ref}</strong></p>
+
+  <div class="doc-title">Training Notice</div>
+
+  <p style="font-size:11pt;margin-bottom:10px;text-align:center;">
+    This is to notify that Kailash Helicopter Services Ltd. is going to conduct training.
+    Please find the detail of the training here below:
+  </p>
+
+  <div style="margin-left:16px;">
+    <div class="doc-meta"><strong>Training Description:</strong>&nbsp; ${description}</div>
+    <div class="doc-meta"><strong>Project Start:</strong>&nbsp; ${dateFmt}</div>
+    <div class="doc-meta"><strong>No. of Days:</strong>&nbsp; ${no_of_days}</div>
+    <div class="doc-meta"><strong>Facility:</strong>&nbsp; ${facility}</div>
+    <div class="doc-meta"><strong>Trainer:</strong>&nbsp; ${trainer}</div>
+    <div class="doc-meta" style="margin-top:8px;">
+      <strong>Participant List</strong>&nbsp;
+      <em style="font-size:9.5pt;">(note: may vary upon availability and addition of <span style="text-decoration:underline;">other</span> participant)</em>
+    </div>
+  </div>
+
+  <table style="margin:7px 0 0 16px;border-collapse:collapse;width:calc(100% - 16px);">
+    <thead>
+      <tr>
+        <th style="border:1px solid #000;padding:5px 8px;background:#f0f0f0;font-size:11pt;">Full Name</th>
+        <th style="border:1px solid #000;padding:5px 8px;background:#f0f0f0;font-size:11pt;">Department</th>
+      </tr>
+    </thead>
+    <tbody>${noticeRows}</tbody>
+  </table>
+
+  <p style="font-size:10pt;margin:12px 0 18px;">
+    All the listed participants are requested to be available for the training or inform the immediate
+    supervisor in case of conditions which restricts them from attaining the training.
+  </p>
+
+  <p style="font-size:11pt;margin-bottom:28px;">Regards</p>
+  <p style="font-size:11pt;font-weight:700;">${signatory}</p>
+
+  <div class="doc-spacer"></div>
+  <div class="doc-footer">This form is a part of Training Manual Ref: KHS-ETPM-01</div>
+</div>
+
+${feedbackFormsHtml}
+
+<div class="a4-page">
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:15px;">
+    <tr>
+      <td style="padding:10px;width:160px;border-right:1px solid #000;text-align:center;vertical-align:middle;">${khsLogo(66)}</td>
+      <td style="padding:10px;font-weight:700;font-size:13.5pt;text-align:center;vertical-align:middle;color:#7a7a7a;">KHS TRAINER FEEDBACK ASSESSMENT</td>
+      <td style="padding:10px;width:160px;border-left:1px solid #000;vertical-align:middle;">
+        <div style="border:1px solid #000;padding:6px;font-size:9.5pt;line-height:1.4;">
+          Form No. KHS/T/012<br>Amdt 0, Apr 2024
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:15px;font-size:11.5pt;">
+    <tr>
+      <td style="border:1px solid #000;padding:10px;width:55%;">Course Title: <strong>${description}</strong></td>
+      <td style="border:1px solid #000;padding:10px;width:45%;">Training Date: - ${dateShort}</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000;padding:10px;">Instructor: - ${trainer}</td>
+      <td style="border:1px solid #000;padding:10px;">Training Duration / Days: - ${no_of_days}</td>
+    </tr>
+    <tr>
+      <td colspan="2" style="border:1px solid #000;padding:10px;">Training Location: - ${facility}</td>
+    </tr>
+  </table>
+
+  <p style="font-size:11pt;font-style:italic;margin-bottom:8px;">Tick for your response</p>
+
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;text-align:center;font-size:12pt;">
+    <tr>
+      <td colspan="4" style="border:1px solid #000;padding:12px;font-weight:700;">CONTENT</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000;padding:12px;width:55%;"></td>
+      <td style="border:1px solid #000;padding:12px;width:15%;font-weight:700;">Yes</td>
+      <td style="border:1px solid #000;padding:12px;width:15%;font-weight:700;">No</td>
+      <td style="border:1px solid #000;padding:12px;width:15%;font-weight:700;">Neutral</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000;padding:12px;font-weight:700;">Candidate Participation</td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000;padding:12px;font-weight:700;">Was all the equipment working properly</td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000;padding:12px;font-weight:700;">Training Location met the objectives</td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="border:1px solid #000;padding:12px;font-weight:700;vertical-align:middle;">Any Safety Issues raised during the training</td>
+      <td style="border:1px solid #000;height:40px;"></td>
+      <td style="border:1px solid #000;"></td>
+      <td style="border:1px solid #000;"></td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border:1px solid #000;padding:12px;text-align:left;vertical-align:top;height:140px;font-weight:700;font-size:11pt;">(If Yes, Please Explain)</td>
+    </tr>
+  </table>
+
+  <p style="font-size:11.5pt;margin-top:24px;">Please write your comments/Suggestions to improve:</p>
+
+  <div class="doc-spacer"></div>
+  <div class="doc-footer">This form is a part of Training Manual Ref: KHS-ETPM-01</div>
+</div>
+
+<div class="a4-page">
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:15px;">
+    <tr>
+      <td style="padding:10px;width:160px;border-right:1px solid #000;text-align:center;vertical-align:middle;">${khsLogo(66)}</td>
+      <td style="padding:10px;font-weight:700;font-size:15pt;text-align:center;vertical-align:middle;color:#7a7a7a;">TRAINING ASSESSMENT FORM</td>
+      <td style="padding:10px;width:160px;border-left:1px solid #000;vertical-align:middle;">
+        <div style="border:1px solid #000;padding:6px;font-size:9.5pt;line-height:1.4;">
+          Form No. KHS/T/008<br>Amdt. 01, Nov 2024
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div style="font-size:11.5pt;line-height:1.8;margin-bottom:15px;margin-top:10px;">
+    Course Title: ${description}<br>
+    Training Date: ${dateShort}<br>
+    Training Duration: ${no_of_days} day(s)<br>
+    Training Location: ${facility}<br>
+    Instructor/Trainer: ${trainer}
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;font-size:11pt;">
+    <tr>
+      <td colspan="3" style="border:1px solid #000;padding:6px 10px;text-align:center;">Total No of Participants</td>
+      <td style="border:1px solid #000;padding:6px 10px;text-align:center;width:15%;">${participants.length || ''}</td>
+      <td style="border:1px solid #000;padding:6px 10px;text-align:center;width:15%;"> - </td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border:1px solid #000;padding:6px 10px;text-align:center;">Total No of Assessment Sheet</td>
+      <td style="border:1px solid #000;padding:6px 10px;"></td>
+      <td style="border:1px solid #000;padding:6px 10px;"></td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000;padding:6px 10px;width:40%;"></td>
+      <td style="border:1px solid #000;padding:6px 10px;font-weight:700;text-align:center;width:15%;">Total No. of A</td>
+      <td style="border:1px solid #000;padding:6px 10px;font-weight:700;text-align:center;width:15%;">Total No. of B</td>
+      <td style="border:1px solid #000;padding:6px 10px;font-weight:700;text-align:center;width:15%;">Total No. of C</td>
+      <td style="border:1px solid #000;padding:6px 10px;font-weight:700;text-align:center;width:15%;">Total No. of D</td>
+    </tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Classroom Facility</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Relevance of course with job function</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Up-to-date material</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Course duration</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Communication skills</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Clarity of presentation</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+    <tr><td style="border:1px solid #000;padding:6px 10px;">Response to questions</td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td><td style="border:1px solid #000;"></td></tr>
+  </table>
+
+  <p style="font-weight:700;margin-top:20px;font-size:11pt;">Remarks:</p>
+
+  <div class="doc-spacer"></div>
+
+  <div style="margin-top:40px;">
+    <div style="border-top:1.5px solid #000;width:260px;margin-bottom:8px;"></div>
+    <p style="font-weight:700;font-size:11pt;">${signatory}</p>
+    <p style="font-weight:700;font-size:11pt;">Training Manager</p>
+    <p style="font-size:10.5pt;margin-top:20px;">(Check if the response Below C is 40%, then the Training is found to be Un-Satisfactory.)</p>
+  </div>
+
+  <div class="doc-footer" style="margin-top:30px;">This form is a part of Training Manual Ref: KHS-ETPM-01</div>
+</div>
+
+<div class="a4-page">
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-bottom:15px;">
+    <tr>
+      <td style="padding:10px;width:160px;border-right:1px solid #000;text-align:center;vertical-align:middle;">${khsLogo(66)}</td>
+      <td style="padding:10px;font-weight:700;font-size:13.5pt;text-align:center;vertical-align:middle;color:#7a7a7a;">TRAINING COMPLETION<br>CHECKLIST</td>
+      <td style="padding:10px;width:160px;border-left:1px solid #000;vertical-align:middle;">
+        <div style="border:1px solid #000;padding:6px;font-size:9.5pt;line-height:1.4;">
+          Form No. KHS/T/015<br>Amdt 0 Apr 2024
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div style="font-size:12pt;line-height:1.6;margin-bottom:15px;">
+    Training Date: ${dateFmt}<br>
+    Training Title: <strong>${description}</strong><br>
+    Trainer/ Instructor: ${trainer}
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;border:1px solid #000;font-size:12pt;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #000;padding:8px;width:8%;text-align:left;">SN</th>
+        <th style="border:1px solid #000;padding:8px;width:62%;text-align:left;">Items</th>
+        <th style="border:1px solid #000;padding:8px;width:30%;text-align:left;">Status/Remarks</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">1.</td>
+        <td style="border:1px solid #000;padding:8px;">Training Approval</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">2.</td>
+        <td style="border:1px solid #000;padding:8px;">Training Notice</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">3.</td>
+        <td style="border:1px solid #000;padding:8px;">Attendance Sheet</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">4.</td>
+        <td style="border:1px solid #000;padding:8px;">Certificate of Completion/Participation</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;height:60px;vertical-align:top;">Examination and Grading Records</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">6.</td>
+        <td style="border:1px solid #000;padding:8px;">OJT/Job Training Log/Practical Training Evidence</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">7.</td>
+        <td style="border:1px solid #000;padding:8px;">Exemption approval if any</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">8.</td>
+        <td style="border:1px solid #000;padding:8px;">Training Slides and Content</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">9.</td>
+        <td style="border:1px solid #000;padding:8px;">For online training, evidence of participation</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;padding:8px;text-align:center;">10.</td>
+        <td style="border:1px solid #000;padding:8px;">Documentation of records in Individual Records</td>
+        <td style="border:1px solid #000;padding:8px;"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-weight:700;margin-top:40px;font-size:12pt;">Verified and documented by:</p>
+  <div class="doc-spacer"></div>
+  <div class="doc-footer">This form is a part of Training Manual Ref: KHS-TPM-01</div>
+</div>
+`;
+
+  document.getElementById('docs-output').innerHTML = html;
+  document.getElementById('preview-area').style.display = 'block';
+  document.getElementById('btn-download').style.display = 'inline-block';
+  document.getElementById('btn-print').style.display = 'inline-block';
+  document.getElementById('preview-area').scrollIntoView({ behavior: 'smooth' });
+}
+
+function downloadHTML() {
+  const ref = document.getElementById('ref').value.trim() || 'KHS-Training';
+  const docsContent = document.getElementById('docs-output').innerHTML;
+
+  const fullHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KHS Training Documents — ${ref}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #e8e8e8; font-family: 'Times New Roman', serif; }
+  .a4-page {
+    width: 210mm; min-height: 297mm; background: #fff;
+    margin: 0 auto; padding: 15mm 15mm 12mm 15mm;
+    page-break-after: always; font-family: 'Times New Roman', serif;
+    font-size: 12pt; line-height: 1.45; color: #000;
+    display: flex; flex-direction: column;
+  }
+  .doc-logo-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .doc-form-no { font-size: 10pt; text-align: right; line-height: 1.55; }
+  .doc-title { text-align: center; font-weight: 700; font-size: 13pt; margin: 8px 0 12px; }
+  .doc-meta { margin-bottom: 5px; font-size: 11pt; }
+  .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11pt; }
+  .doc-table th, .doc-table td { border: 1px solid #000; padding: 5px 8px; }
+  .doc-table th { font-weight: 700; background: #f0f0f0; }
+  .doc-footer { font-size: 9.5pt; color: #555; }
+  .doc-trainer { font-size: 11pt; }
+  .doc-spacer { flex: 1; min-height: 12px; }
+  .doc-feedback-outer { border: 1px solid #000; margin-bottom: 10px; }
+  .doc-feedback-header { display: grid; grid-template-columns: 1fr 1fr; }
+  .doc-feedback-cell { padding: 5px 8px; border-right: 1px solid #000; border-bottom: 1px solid #000; font-size: 10.5pt; }
+  .doc-feedback-cell:nth-child(even) { border-right: none; }
+  .doc-feedback-cell.full { grid-column: span 2; border-right: none; border-bottom: none; }
+  .feedback-rating-table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  .feedback-rating-table th, .feedback-rating-table td { border: 1px solid #000; padding: 5px 7px; text-align: center; }
+  .feedback-rating-table td:first-child { text-align: left; }
+  @media print {
+    body { background: white; }
+    .a4-page { margin: 0; box-shadow: none; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+${docsContent}
+</body>
+</html>`;
+
+  const blob = new Blob([fullHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `KHS_Training_Docs_${ref}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

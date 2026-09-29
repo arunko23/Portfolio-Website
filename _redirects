@@ -1,0 +1,3 @@
+# Cloudflare Pages Redirects & Rewrites
+/training   /training.html   200
+/training/  /training.html   200

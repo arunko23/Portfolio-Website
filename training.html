@@ -29,11 +29,8 @@
   .app-header {
     background: linear-gradient(135deg, var(--navy) 0%, #2d3f6b 100%);
     color: white; padding: 22px 48px;
-    display: flex; align-items: center; justify-content: space-between; gap: 20px;
-    box-shadow: 0 4px 24px rgba(26,39,68,0.25);
-  }
-  .app-header-left {
     display: flex; align-items: center; gap: 20px;
+    box-shadow: 0 4px 24px rgba(26,39,68,0.25);
   }
   .app-header .logo-circle {
     width: 48px; height: 48px; background: var(--red);
@@ -42,14 +39,6 @@
   }
   .app-header h1 { font-family: 'Crimson Pro', serif; font-size: 1.6rem; font-weight: 700; }
   .app-header p { font-size: 0.92rem; opacity: 0.7; margin-top: 2px; }
-  .app-header .nav-back {
-    color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem;
-    font-weight: 500; padding: 7px 16px; border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 6px; transition: all 0.2s; white-space: nowrap;
-  }
-  .app-header .nav-back:hover {
-    color: #fff; border-color: #fff; background: rgba(255,255,255,0.1);
-  }
 
   .container { max-width: 860px; margin: 32px auto; padding: 0 24px 60px; }
 
@@ -182,14 +171,11 @@
 <body>
 
 <div class="app-header">
-  <div class="app-header-left">
-    <div class="logo-circle">KHS</div>
-    <div>
-      <h1>Training Document Generator</h1>
-      <p>Kailash Helicopter Services — Fill once, generate documents automatically</p>
-    </div>
+  <div class="logo-circle">KHS</div>
+  <div>
+    <h1>Training Document Generator</h1>
+    <p>Kailash Helicopter Services — Fill once, generate documents automatically</p>
   </div>
-  <a href="index.html" class="nav-back">← Portfolio</a>
 </div>
 
 <div class="container">

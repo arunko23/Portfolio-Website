@@ -1,0 +1,4 @@
+# Cloudflare Pages Redirects
+/Training   /training   301
+/Training/  /training   301
+/training/  /training   301

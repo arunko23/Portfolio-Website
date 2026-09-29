@@ -1,6 +1,12 @@
-// This middleware intercepts all requests to /functions and adds CORS headers
 export const onRequest: PagesFunction = async (context) => {
   const { request, next } = context;
+
+  // Ensure any case variation like /Training or trailing slash redirects to /training
+  const url = new URL(request.url);
+  const normalizedPath = url.pathname.toLowerCase().replace(/\/+$/, "");
+  if (normalizedPath === "/training" && url.pathname !== "/training") {
+    return Response.redirect(`${url.origin}/training${url.search}`, 301);
+  }
 
   // Handle preflight requests
   if (request.method === "OPTIONS") {
